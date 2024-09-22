@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title>Amplizard: Email Verification</title>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			background-color: #f7f7f7;
+			color: #333;
+			margin: 0;
+			padding: 0;
+		}
+
+		.container {
+			width: 100%;
+			max-width: 600px;
+			margin: 0 auto;
+			background-color: #fff;
+			padding: 20px;
+			border-radius: 8px;
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+		}
+
+		.header {
+			text-align: center;
+			padding-bottom: 20px;
+		}
+
+		.header h1 {
+			margin: 0;
+			color: #4CAF50;
+		}
+
+		.content {
+			text-align: center;
+		}
+
+		.content p {
+			font-size: 16px;
+			line-height: 1.5;
+		}
+
+		.btn {
+			display: inline-block;
+			background-color: #4CAF50;
+			color: #fff;
+			padding: 15px 25px;
+			text-decoration: none;
+			border-radius: 5px;
+			margin-top: 20px;
+			font-size: 16px;
+		}
+
+		.btn:hover {
+			background-color: #45a049;
+		}
+
+		.footer {
+			text-align: center;
+			padding-top: 20px;
+			font-size: 14px;
+			color: #888;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="container">
+		<div class="header">
+			<h1>Welcome to Amplizard</h1>
+		</div>
+		<div class="content">
+			<p>Hi {{username}},</p>
+			<p>Thank you for signing up to Amplizard! Please verify your email address by clicking the button below.</p>
+			<a href="{{link}}" class="btn">Verify Email</a>
+			<p>If you did not create an account, no further action is required.</p>
+		</div>
+		<div class="footer">
+			<p>&copy; 2024 Amplizard. All rights reserved.</p>
+		</div>
+	</div>
+</body>
+
+</html>

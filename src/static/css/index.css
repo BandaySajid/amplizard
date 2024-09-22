@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+button:disabled {
+  opacity: 0.7; /* Adjust opacity to make it lighter */
+  cursor: not-allowed; /* Change cursor to indicate disabled state */
+}
+
+input:disabled {
+  opacity: 0.8; /* Adjust opacity to make it lighter */
+  cursor: not-allowed; /* Change cursor to indicate disabled state */
+}
+
+body {
+  font-family: "Ubuntu", sans-serif;
+  font-style: normal;
+}
+
+.required:after {
+  content: " *";
+  color: red;
+}
+
+.htmx-indicator {
+  display: none;
+}
+.htmx-request .htmx-indicator {
+  display: inline-block;
+}
+.htmx-request.htmx-indicator {
+  display: inline-block;
+}

@@ -1,0 +1,45 @@
+<div x-data="{ fullscreenModal: false }" x-init="
+    $watch('fullscreenModal', function(value){
+            if(value === true){
+                document.body.classList.add('overflow-hidden');
+            }else{
+                document.body.classList.remove('overflow-hidden');
+            }
+        })
+    " @keydown.escape="fullscreenModal=false">
+	<button @click="fullscreenModal=true" type="button"
+		class="inline-flex items-center justify-center h-10 px-4 py-2 text-sm font-medium transition-colors bg-white border rounded-md hover:bg-neutral-100 active:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-neutral-200/60 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none">Set
+		{{btn_name}}</button>
+	<template x-teleport="body">
+		<div x-show="fullscreenModal" x-transition:enter="transition ease-out duration-100"
+			x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+			x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100"
+			x-transition:leave-end="opacity-0" class="flex fixed inset-0 z-[99] w-screen h-screen bg-white">
+			<button @click="fullscreenModal=false"
+				class="absolute top-0 right-0 z-30 flex items-center justify-center px-3 py-2 mt-3 mr-3 space-x-1 text-xs font-medium uppercase border rounded-md border-neutral-200 text-neutral-600 hover:bg-neutral-100">
+				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+					class="w-4 h-4">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+				</svg>
+				<span>Close</span>
+			</button>
+			<div class="relative flex bg-neutral-100 flex-wrap items-center w-full h-full px-8 overflow-y-auto">
+				<div class="relative w-full mx-auto p-4 items-center lg:mb-0 text-center">
+					<div class="relative">
+						<div class="flex flex-col mb-6 space-y-2">
+							<h1 class="text-2xl font-semibold tracking-tight">{{btn_name}}</h1>
+							<p class="text-sm text-neutral-500">Enter the data in json format.</p>
+
+							<p class="text-xs text-red-500 json-error hidden">Invalid JSON data</p>
+						</div>
+
+						<div class="w-full  h-full mx-auto flex items-center">
+							<textarea type="text" id="hook_{{btn_name}}" form="intent_edit_form" oninput="validateJSON(event);"
+								placeholder="Enter your data here."
+								class="flex w-full min-h-[200px] px-3 py-2 text-sm bg-white border rounded-md border-neutral-300 placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50">{{data}}</textarea>
+						</div>
+					</div>
+				</div>
+			</div>
+	</template>
+</div>

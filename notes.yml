@@ -1,0 +1,126 @@
+Amplizard (AI Powered Customer service chatbot Project)
+
+- Target Market: Small to medium businesses.
+
+System Design and Architecture: 
+  - We will be providing a chatbot service that businesses can integrate into their applications.
+  - Businesses would have to create hooks to define the behaviour of the chatbot.
+  - For every hook the api associated with it will be called everytime the hook is triggered.
+
+Core Features:
+  - Bot creation and management.
+  - Hook creation and management.
+  - NLP (prebuilt apis) for chat-message to hook recognition.
+  - Action hook definition and triggering.
+  - [consider] Realtime Chatbox : Amplizard would stream the complex queries to that chatbox, where customer service would be able to act on that query.
+
+TODO:
+  - FRONTEND:
+    - [x] Add alert messages for http requests on the frontend (sucesss / error alerts).
+    - [x] Make the theme match on all the pages.
+    - [x] Image upload in the chat feature.
+    - [x] Provide the ui through cdn or something, so that businesses can embed the chatbot ui or frontend.
+    - [x] Add loading spinner to buttons.
+    - [x] show chat expired content when chat is expired.
+    - [x] Write integration documentation.
+    - [x] Add a back button.
+
+
+  - BACKEND:
+    - [x] Hooks data should only be fed once to the model, when a new chatSession is started.
+    - [x] Create newChat route so that businesses will first call that api then the chat api, so that its easy to manage the state of chat and model.
+    - [x] Bot name should be used as the model name.
+    - [x] Chat expiry feature, when inactive for too long, when 3 inappropriate or unrelated things, When query resolved.
+    - [x] For apis, migrate from responding with html to responding with json.
+    - [ ] Save the chat history in database with id and save it in the format of chatSession content.
+    - [ ] Write tests.
+    - [ ] Fine tune the model.
+   
+  - OVERALL:
+    - [x] Businesses will request our server /chat endpoint with post method and start the chat. They will be having two options to get the data, as a stream or as a compleete response using direct post request or event stream.
+    - [x] Business should be only able to interact with the chatbot only if they have a valid api key. Add verification to chat route.
+    - [x] Create a multi stage build, to only have build in the production and dev dependenices in the development container.
+    - [x] Limit input tokens.
+    - [x] Image upload feature, ai should be able to analyze it. Create Function trigger. This functionality should work based on what the model figures out, if the model wants the customer to send a video or a picture, then the function related to it should be triggered.
+    - [x] Create functionality for ui embedding.
+    - [x] Functionality to handle bot url.
+    - [x] Figure out how to use the image analysis function, in function calling or to send response to model as default chat.
+    - [x] Fix the error for ai function 'sendImageForAnalysis' not triggering, if nothing works, try changing it to a hook.
+    - [x] Add integration code on frontend for businesses.
+    - [ ] Run promises that are not awaited / handled as background functions, to handle them correctly and log errors .
+    - [ ] Test whole functionality.
+    - [ ] Users should be able to choose how to trigger hooks, like if they want to trigger the public api, or receiving event using websocket and writing custom code or triggering internal api using a tool on their backend.
+    - [ ] Chatbot should figure out the recent behaviour of user and when he comes the next time, it should show up some buttons to do action. Like cancel_order or something.
+    - [ ] Support for all top llMs / ais, like open ai, gemini, claude etc.
+
+  - UPCOMING:
+    - [ ] Optimise model system instruction.
+    - [ ] Monitoring chatbot errors and logging them on a separate logger.
+    - [ ] Build Data streaming pipeline (customer with chatbot convo) for businesses.
+    - [ ] Ratelimiting.
+
+    - DASHBOARD (this includes both for our system and our target customers(businesses)):
+      - [ ] Chat volume: Total number of chats initiated (Daily, Monthly).
+      - [ ] Chat resolution rate: Percentage of chats resolved by the chatbot without human intervention.
+      - [ ] Average chat duration: Average time spent in a chat.
+      - [ ] Customer satisfaction: Feedback scores or ratings from customers.
+      - [ ] Abandoned chats: Number of chats left unresolved.
+      - [ ] Hook trigger frequency: How often different hooks are triggered, No of hooks triggered.
+      - [ ] Hook accuracy: How well the chatbot identifies and triggers correct hooks.
+      - [ ] False positive rate: Incorrect hook triggers.
+      - [ ] False negative rate: Missed opportunities to trigger hooks.
+      - [ ] Average response time: Time taken by the chatbot to respond to user queries.
+      - [ ] Error rate: Percentage of errors encountered by the chatbot.
+      - [ ] Visualizations: Use charts and graphs to present data effectively.
+      - [ ] Api usage.
+
+      - Additional:
+        - Customizable filters: Allow users to filter data by date, time, or other parameters.
+        - Export capabilities: Enable users to export data for further analysis.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+OLD PROMPT:
+  You will be given a name, you are an advanced AI assistant designed to handle e-commerce customer service inquiries. Your function is to solve customer issues, whether its getting an information on an order, tracking an order or cancelling an order. Your command is to be ethical and respond ethically. You will always be given hooks data. Make sure to figure out and verify things instead of rushing into things.
+			So what you have to do is, for every user messsage, you would figure out what you need and then figure out which hook you need currently. If after great efforts you weren't able to find the thing, just respond with 'I am not capable of doing that'.
+			But remember, you gotta respond by verification. You are a completely like a customer service agent, so you need to ask the details to the user like they do. Utilize all the hooks you have relevently and figure out what you need, verification is must for security, don't just go an directly trigger the hook that is there, if you have other hooks that are relevant to query then utilize those first, in order.
+
+			NOTE: Make sure to take things step by step, like for example if customer wants to return an order, then you need to firstget user data, gather that first, then move on to second step, like getting order data, then asking user for like why he/she wants to do that. This is just an example, so figure that on your own, don't harm the businesss.
+
+			Remember, whenever you need an image, to further verify things, like for e.g when a customer wants to return an order, and customer says that this order is damaged, this and that, then you would send a message to customer that you need an image and also with that you would trigger a function to send image for analysis, and that function would send the request (that it will get an image) to an intermediary ai for analyzing the image, and then you would get the response from ai about image analysis, but remember to include the data needed by that function. You would trigger that function when you need an image from a customer and verify if the thing is right. So make sure to utilize the real world case / scenario, and make sure you work like that.
+
+			Note: When you get the data / structure of the hook, make sure to format that in correct json format.
+
+			- Example:
+				For example, if a user wants to cancel his order, you shouldn't directly rush into solving that, you need to first figure out what you want, so you might want user data first, then order data, then you will verify things, like checking if the thing is elgible for doing that, and you wouldn't ask that to user, you would figure that out based on the data and then you might go to cancel the order.
+
+				So how you will do that is, you will figure out the hook based on the hooks data (like hook name or url) you have and your needs, and once you get that hook, you will trigger that hook with the structure specified in the hook, like url, payload(body), method, headers etc. But remember you will trigger that hook with the data you have, like if you hvae the userId and the payload structure accepts a userId, then you will put the userId there, so be cautious about this as you shouln't put demo/wrong data in this.
+
+				Here as I am explaining an example, You should always figure out the thing first, like what do you want.
+
+				Then here, you might get the data of the user and then you might need the order data, so you will do the same thing of getting / figuring out hook and then triggering the hook with the data needed for the hook.
+
+				Then after verifying things, if you finally want to cancel the order, you will do the same thing of getting hook and then triggering the hook associated with that hook.
+
+				Make sure to be strict, because this is a serious business, we can't afford errors or faults. Make sure to focus on verification, and follow the infromation you have, don't just handover things to customers.
+
+Explanation:
+  In the traditional approach to customer service, businesses rely on agents who spend 8-10 hours a day handling customer queries. This is a demanding and often overwhelming task. To address this, automated systems like chatbots were introduced. But, these chatbots have their own limitations—they can only handle predefined tasks, and businesses can't easily expand their functionality or make them more dynamic.
+
+  That’s where Amplizard comes in. Amplizard is a next-generation customer service chatbot that businesses can integrate directly into their applications. What sets Amplizard apart is that it doesn’t box businesses into using only the functions that are already built into the bot. Instead, businesses have the freedom to create their own custom functionalities.
+
+  All a business needs to do is define hooks for the tasks they want the bot to handle, whether it’s canceling an order, tracking a shipment, or any other specific need. Amplizard then uses its AI to understand what the customer is asking for and triggers the appropriate hook.
+
+  This means that businesses can significantly reduce the number of customer service agents they need, and those agents can focus on more complex issues, all while Amplizard handles the routine tasks more efficiently.

@@ -1,0 +1,9 @@
+node_modules
+package-lock.json
+dist
+.env
+src/.env
+test_build
+docs/venv
+docs/site
+notes

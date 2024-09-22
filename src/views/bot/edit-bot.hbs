@@ -1,0 +1,41 @@
+<section class='sm:ml-64 px-8 py-4 min-h-full'>
+  <div class=' mx-auto w-full'>
+    <div class='overflow-hidden'>
+      <div class='p-4 '>
+        {{> Back}}
+        <h2 class='text-3xl font-semibold text-white mb-6'>{{type}} Bot</h2>
+        <form onsubmit="event.preventDefault();" class="space-y-6">
+          <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+            {{> input name="name" label="Bot Name" type="text" value=data.bot.name warning="This name will be used for
+            chabot" required="required"}}
+            {{> input name="description" label="Bot Description" type="text" value=data.bot.description}}
+            <!--
+            {{> input placeholder="e.g: http://localhost:8098/bot" name="url" label="Bot communication endpoint" type="text" value=data.bot.url warning="This url will be used for prebuilt amplizard bot ui"}}
+						-->
+            {{#if (eq type "Edit")}}
+            {{> input label="Bot ID" type="text" value=data.bot.bot_id disabled="disabled"}}
+            {{/if}}
+          </div>
+          {{#if (eq type "Edit")}}
+          <div class="hooks-anchor ">
+            <a href="/bots/{{data.bot.bot_id}}/hooks" type="" class="text-white bg-neutral-800 p-4 hover:bg-neutral-600">Manage hooks</a>
+          </div>
+          {{/if}}
+          <div class='flex items-center justify-between w-auto'>
+            {{#if (eq type "Edit")}}
+            {{> delete-modal type="bot" url=(concat "/api/v1/bots/" data.bot.bot_id)
+            method="delete" target=""}}
+            {{/if}}
+            <div class='flex flex-col items-end justify-end'>
+              {{#if (eq type "Edit")}}
+              {{> button method=method url=url class="flex px-4 py-2 text-black bg-white text-sm rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" text="Save"}}
+              {{else}}
+              {{> button method=method url=url class="flex px-4 py-2 text-black bg-white text-sm rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" text="Next"}}
+              {{/if}}
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>

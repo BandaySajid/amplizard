@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json.schemastore.org/swcrc",
+  "jsc": {
+    "parser": {
+      "syntax": "typescript",
+      "tsx": false,
+      "dynamicImport": true,
+      "decorators": false
+    },
+    "transform": null,
+    "target": "es2022",
+    "loose": false,
+    "externalHelpers": false,
+    "keepClassNames": false
+  },
+  "module": {
+    "type": "es6",
+    "strict": true,
+    "strictMode": false,
+    "noInterop": false,
+    "lazy": false,
+    "resolveExtensions": [".js", ".ts", ".hbs", ".sql"]
+  },
+  "minify": true,
+	"inlineSourcesContent": true
+}

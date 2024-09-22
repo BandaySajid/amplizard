@@ -1,0 +1,40 @@
+<html lang='en'>
+  <head>
+    <meta charset='UTF-8' />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}} | Amplizard</title>
+    <meta
+		content="Amplizard is a platform that provides customer service chatbots with seamless internal API integration, enabling efficient and automated support without the need for human intervention."
+		name="description">
+      <meta content="Amplizard: Revolutionizing Customer Service with Intelligent API-Integrated Chatbots"
+		property="og:title">
+      <meta
+		content="Amplizard is a platform that provides customer service chatbots with seamless internal API integration, enabling efficient and automated support without the need for human intervention."
+		property="og:description">
+        <meta content="Amplizard: Revolutionizing Customer Service with Intelligent API-Integrated Chatbots">
+        <meta
+		content="mplizard is a platform that provides customer service chatbots with seamless internal API integration, enabling efficient and automated support without the need for human intervention."
+		property="twitter:description">
+          <meta property="og:type" content="website">
+          <meta content="summary_large_image" name="twitter:card">
+          <link rel="preconnect" href="https://fonts.googleapis.com">
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+          <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
+          <link rel='stylesheet' href='/css/styles.css' />
+          <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+          <script src="/js/htmx.min.js"></script>
+          <script defer src="/js/alpine.min.js"></script>
+          <script defer src="/js/fontawesome.js" crossorigin="anonymous"></script>
+        </head>
+        <body class="h-full bg-[#0F0F10]">
+          {{#if (notEq "noMenu") }}
+          {{> menu}}
+          {{/if}}
+          {{> toast}}
+          <main>
+            {{{body}}}
+          </main>
+        </body>
+        <script src="/js/hotReload.js"></script>
+        <script src="/js/index.js" type="module"></script>
+      </html>
