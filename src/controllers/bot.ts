@@ -245,7 +245,14 @@ export async function handleDeleteBot(
 
 function createNewChat(botId: string, botName: string): string {
   const chatId = crypto.randomUUID();
-  new Model({ modelName: botName, botId, chatId });
+  new Model({
+    provider: "GOOGLE",
+    modelName: botName,
+    botId,
+    chatId,
+    apiKey: config.gemini.api_key,
+    modelId: "gemini-1.5-flash",
+  });
   return chatId;
 }
 

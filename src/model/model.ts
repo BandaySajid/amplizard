@@ -1,11 +1,93 @@
-import { callVisionModel, getAgentChatSession } from "./api.js";
-import {
-  ChatSession,
-  EnhancedGenerateContentResponse,
-} from "@google/generative-ai";
-import * as util from "../util.js";
-import redis from "../db/redis.js";
+//import * as util from "../util.js";
+//import redis from "../db/redis.js";
 import { jsonrepair } from "jsonrepair";
+import { CoreMessage, LanguageModelV1 } from "ai";
+import { initGenAI } from "./api.js";
+//import { getContext } from "./context/index.js";
+import { generateText } from "ai";
+import z from "zod";
+import config from "../config.js";
+
+// const systemInstruction = getContext();
+
+const triggerHookFunctionDeclaration = {
+  description: "Trigger hook and get the response.",
+  parameters: z.object({
+    hookName: z.string().describe("Name of the hook to trigger"),
+    data: z
+      .string()
+      .describe(
+        "The data to trigger the hook, its a JSON object of url, method, payload, headers. Make sure to add real data to them.",
+      ),
+  }),
+  execute: async ({ hookName, data }: { hookName: string; data: string }) => {
+    try {
+      let parsed;
+      try {
+        if (typeof data === "string") {
+          data = data.replaceAll("\\", "");
+        }
+        parsed = JSON.parse(data);
+      } catch (err) {
+        parsed = jsonrepair(data);
+        if (typeof parsed === "string") parsed = JSON.parse(parsed);
+      }
+      return triggerHook(hookName, parsed);
+    } catch (err) {
+      console.error("Invalid json data to trigger the hook:", err);
+      return triggerHook(hookName, {
+        status: "error",
+        description: "Invalid json data to trigger the hook",
+      } as TriggerRespError);
+    }
+  },
+};
+
+// const sendImageForAnalysisFunctionDeclaration = {
+//   description: "Send image for analysis.",
+//   parameters: z.object({
+//     promptForAi: z
+//       .string()
+//       .describe(
+//         `Prompt for an AI to analyze an image, ensuring clarity in the verification process while adhering to security and ethical guidelines. For example: "Please compare these two images and identify any signs of damage.`,
+//       ),
+//     imageUrl: z
+//       .string()
+//       .describe("url of the order image to compare the customer image with."),
+//   }),
+//   execute: async ({
+//     promptForAi,
+//     imageUrl,
+//     customerImage,
+//   }: {
+//     promptForAi: string;
+//     imageUrl: string;
+//     customerImage: string;
+//   }) => {
+//     console.log("sending image for analysis");
+//     return await sendImageForAnalysis(promptForAi, imageUrl, customerImage);
+//   },
+// };
+
+const closeChatFunctionDeclaration = {
+  description: "Close the chat.",
+  parameters: z.object({
+    message: z
+      .string()
+      .describe(
+        "Message to customer about chat getting closed due to (mention the reason)",
+      ),
+  }),
+  execute: async ({ chatId, message }: { chatId: string; message: string }) => {
+    return closeChat(chatId, message);
+  },
+};
+
+const function_tools = {
+  triggerHook: triggerHookFunctionDeclaration,
+  // sendImageForAnalysis: sendImageForAnalysisFunctionDeclaration,
+  closeChat: closeChatFunctionDeclaration,
+};
 
 function isTriggerRespError(arg: any): arg is TriggerRespError {
   return arg && arg.status === "error" && arg.description;
@@ -31,107 +113,61 @@ interface ModelData {
   chatId: ChatId;
   botId: string;
   modelName: string;
-  chat: ChatSession;
+  model: LanguageModelV1;
+  history: CoreMessage[];
   isHookDataSet: boolean;
   hookData?: HooksDataString;
 }
 
 type ModelStore = Map<ChatId, Model>;
 
-const functions = {
-  triggerHook: async ({
-    hookName,
-    data,
-  }: {
-    hookName: string;
-    data: string;
-  }) => {
-    try {
-      let parsed;
-      try {
-        if (typeof data === "string") {
-          data = data.replaceAll("\\", "");
-        }
-        parsed = JSON.parse(data);
-      } catch (err) {
-        parsed = jsonrepair(data);
-        if (typeof parsed === "string") parsed = JSON.parse(parsed);
-      }
-      return triggerHook(hookName, parsed);
-    } catch (err) {
-      console.error("Invalid json data to trigger the hook:", err);
-      return triggerHook(hookName, {
-        status: "error",
-        description: "Invalid json data to trigger the hook",
-      } as TriggerRespError);
-    }
-  },
+// async function getImageFromUrl(url: string) {
+//   const resp = await fetch(url, { mode: "no-cors" });
+//
+//   const blob = await resp.blob();
+//
+//   const base64Data = await util.blobToBase64(blob);
+//
+//   return base64Data;
+// }
 
-  sendImageForAnalysis: async ({
-    promptForAi,
-    imageUrl,
-    customerImage,
-  }: {
-    promptForAi: string;
-    imageUrl: string;
-    customerImage: string;
-  }) => {
-    console.log("sending image for analysis");
-    return await sendImageForAnalysis(promptForAi, imageUrl, customerImage);
-  },
-
-  closeChat({ chatId, message }: { chatId: string; message: string }) {
-    return closeChat(chatId, message);
-  },
-};
-
-async function getImageFromUrl(url: string) {
-  const resp = await fetch(url, { mode: "no-cors" });
-
-  const blob = await resp.blob();
-
-  const base64Data = await util.blobToBase64(blob);
-
-  return base64Data;
-}
-
-async function analyzeAndCompareImages(
-  prompt: string,
-  compareWithImageUrl: string,
-  customerImage: string,
-) {
-  try {
-    const base64Data = await getImageFromUrl(compareWithImageUrl);
-    const compareWithImage = util.imageToGenerativePart(base64Data);
-
-    const customerImagePart = util.imageToGenerativePart(customerImage);
-
-    const analysis = await callVisionModel(
-      prompt,
-      [compareWithImage, customerImagePart],
-      {},
-    );
-
-    return analysis;
-  } catch (err) {
-    console.error("ANALYSIS ERROR:", err);
-    return { status: "error", description: "internal analysis system error!" };
-  }
-}
-
-async function sendImageForAnalysis(
-  promptForAi: string,
-  imageUrl: string,
-  customerImage: string,
-) {
-  const resp = await analyzeAndCompareImages(
-    promptForAi,
-    imageUrl,
-    customerImage,
-  );
-
-  return resp;
-}
+// async function analyzeAndCompareImages(
+//   prompt: string,
+//   compareWithImageUrl: string,
+//   customerImage: string,
+// ) {
+//   try {
+//     const base64Data = await getImageFromUrl(compareWithImageUrl);
+//     const compareWithImage = util.imageToGenerativePart(base64Data);
+//
+//     const customerImagePart = util.imageToGenerativePart(customerImage);
+//
+//     // const analysis = await callVisionModel(
+//     //   prompt,
+//     //   [compareWithImage, customerImagePart],
+//     //   {},
+//     // );
+//
+//     // return analysis;
+//   } catch (err) {
+//     console.error("ANALYSIS ERROR:", err);
+//     return { status: "error", description: "internal analysis system error!" };
+//   }
+// }
+//
+// async function sendImageForAnalysis(
+//   promptForAi: string,
+//   imageUrl: string,
+//   customerImage: string,
+// ) {
+//   const resp = await analyzeAndCompareImages(
+//     promptForAi,
+//     imageUrl,
+//     customerImage,
+//   );
+//
+//   return resp;
+// }
 
 async function callApi(
   url: string,
@@ -202,12 +238,12 @@ function closeChat(chatId: string, closeMessage: string) {
   return { status: "success", description: "chat has been closed!" };
 }
 
-async function functionCaller(
-  response: EnhancedGenerateContentResponse,
-  chat: ChatSession,
+/*async function functionCaller(
+  response: GenerateTextResult<any>,
+  model: LanguageModelV1,
   chatId: string,
-): Promise<EnhancedGenerateContentResponse> {
-  const calls = response.functionCalls();
+): Promise<GenerateTextResult<any>> {
+  const calls = response.toolCalls;
 
   if (!calls) {
     return response;
@@ -217,26 +253,28 @@ async function functionCaller(
 
   let args = call.args as any;
 
-  if (call.name === "sendImageForAnalysis") {
-    const identifier = "customerImage:" + chatId;
-    const customerImage = await redis.get(identifier);
-    args.customerImage = customerImage;
+  // if (call.name === "sendImageForAnalysis") {
+  //   const identifier = "customerImage:" + chatId;
+  //   const customerImage = await redis.get(identifier);
+  //   args.customerImage = customerImage;
+  //
+  //   await redis.del(identifier);
+  // }
+  //
+  // if (call.name === "closeChat") {
+  //   args.chatId = chatId;
+  //   console.log("closing chat!!!");
+  // }
 
-    await redis.del(identifier);
-  }
+  // const cr = await functions[call.name as keyof typeof functions](args);
 
-  if (call.name === "closeChat") {
-    args.chatId = chatId;
-    console.log("closing chat!!!");
-  }
+  // if (call.name === "sendImageForAnalysis") {
+  //   console.log("Image analysis respone:", cr);
+  // }
 
-  const cr = await functions[call.name as keyof typeof functions](args);
+  const result = await generateText({ model, messages: cr. });
 
-  if (call.name === "sendImageForAnalysis") {
-    console.log("Image analysis respone:", cr);
-  }
-
-  const result = await chat.sendMessage([
+  const result = await model.sendMessage([
     {
       functionResponse: {
         name: call.name,
@@ -249,27 +287,32 @@ async function functionCaller(
   const finalResponse = result.response;
 
   return functionCaller(finalResponse, chat, chatId);
-}
+}*/
+
+type ModelInitConfig = {
+  modelName: string;
+  provider: string;
+  botId: string;
+  chatId: string;
+  apiKey: string;
+  modelId: string;
+};
 
 export class Model {
   private static models: ModelStore = new Map();
   private modelData: ModelData;
   public isHookDataSet: boolean;
   public closed: boolean;
-  public closeMessage: string = "";
+  public closeMessage: string;
 
   constructor({
     modelName,
+    provider,
     botId,
     chatId,
-  }: {
-    modelName?: string;
-    botId?: string;
-    chatId: string;
-  }) {
-    if (!chatId) {
-      throw new Error("chatId is required");
-    }
+    apiKey,
+    modelId,
+  }: ModelInitConfig) {
     //const exModel = Model.getModel(chatId);
     /*if (exModel) {
       this.modelData = exModel;
@@ -277,22 +320,29 @@ export class Model {
       return;
     }*/
 
-    const chatSession = getAgentChatSession();
-
-    if (!modelName || !botId) {
-      throw new Error("modelName and botId are required parameters");
+    if (!chatId || !modelId || !modelName || !botId || !provider || !apiKey) {
+      throw new Error(
+        "chatId, modelId, modelName, provider, apiKey and botId are required parameters",
+      );
     }
 
-    const model: ModelData = {
+    console.log("model id is:", modelId);
+
+    const model = initGenAI({ model: modelId, provider }, apiKey);
+
+    this.closeMessage = "";
+
+    const modelData: ModelData = {
       chatId,
       botId,
       modelName,
-      chat: chatSession,
+      history: [],
+      model,
       isHookDataSet: false,
     };
 
     this.isHookDataSet = false;
-    this.modelData = model;
+    this.modelData = modelData;
     this.closed = false;
     Model.models.set(chatId, this);
   }
@@ -315,18 +365,22 @@ export class Model {
       this.modelData.hookData as string,
     );
 
-    const result = await this.modelData.chat.sendMessage(prompt);
+    this.modelData.history.push({ role: "user", content: prompt });
 
-    const response = result.response;
+    const result = await generateText({
+      model: this.modelData.model,
+      //prompt: prompt, // used without message history.
+      system: config.gemini.system_instructions.chat_model,
+      tools: function_tools,
+      maxSteps: 2,
+      messages: this.modelData.history,
+    });
 
-    const finalResult = await functionCaller(
-      response,
-      this.modelData.chat,
-      this.modelData.chatId,
-    );
+    for (const msg of result.responseMessages) {
+      this.modelData.history.push(msg);
+    }
 
-    const finalResponse = finalResult.text();
-    return finalResponse;
+    return result.text;
   }
 
   private initModelNameInstruction(name: string) {
@@ -359,7 +413,7 @@ export class Model {
   }
 
   getHistory() {
-    return this.modelData.chat.getHistory();
+    return this.modelData.history;
   }
 
   static closeChat(chatId: string, closeMessage: string) {
