@@ -15,7 +15,7 @@ TODO:
     - [x] show chat expired content when chat is expired.
     - [x] Write integration documentation.
     - [x] Add a back button.
-
+    - [ ] Field for direct query repsonses, user should be able to choose whether to call api or send direct response. There should be an option to choose if the response should be rephrased by ai or not.
 
   - BACKEND:
     - [x] Hooks data should only be fed once to the model, when a new chatSession is started.
@@ -26,8 +26,11 @@ TODO:
     - [ ] Save the chat history in database with id and save it in the format of chatSession content.
     - [ ] Write tests.
     - [ ] Fine tune the model.
-    - [ ] optimize system instruction and context.
-   
+    - [ ] Optimize system instruction and context.
+    - [ ] Make chat closing more dynamic, move from direct closeChat function calling approach to incrementing inappropriate message / input counter and calling the closeChat function manually when it goes beyond the limit.
+    - [x] Feature to have direct responses for queries, no hook calling, just the response. 
+    - [ ] Fix the annoying bug, form submit button not enabling upon switching a radio button / switch, or just remove the disabling feature.
+
   - OVERALL:
     - [x] Businesses will request our server /chat endpoint with post method and start the chat. They will be having two options to get the data, as a stream or as a compleete response using direct post request or event stream.
     - [x] Business should be only able to interact with the chatbot only if they have a valid api key. Add verification to chat route.

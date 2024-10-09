@@ -3,12 +3,12 @@
 import { jsonrepair } from "jsonrepair";
 import { CoreMessage, LanguageModelV1 } from "ai";
 import { initGenAI } from "./api.js";
-//import { getContext } from "./context/index.js";
+import { getContext } from "./context/index.js";
 import { generateText } from "ai";
-import z from "zod";
-import config from "../config.js";
+import { db } from "../db/connection.js";
 
-// const systemInstruction = getContext();
+import z from "zod";
+import { Hook } from "../types/hook.js";
 
 const triggerHookFunctionDeclaration = {
   description: "Trigger hook and get the response.",
@@ -17,7 +17,7 @@ const triggerHookFunctionDeclaration = {
     data: z
       .string()
       .describe(
-        "The data to trigger the hook, its a JSON object of url, method, payload, headers. Make sure to add real data to them.",
+        "The data to trigger the hook, its a JSON object of url, method, payload, headers. Make sure to add / replace with real data.",
       ),
   }),
   execute: async ({ hookName, data }: { hookName: string; data: string }) => {
@@ -32,7 +32,11 @@ const triggerHookFunctionDeclaration = {
         parsed = jsonrepair(data);
         if (typeof parsed === "string") parsed = JSON.parse(parsed);
       }
-      return triggerHook(hookName, parsed);
+
+      let result = await triggerHook(hookName, parsed);
+      result = { result };
+      console.log("got result:", result);
+      return result;
     } catch (err) {
       console.error("Invalid json data to trigger the hook:", err);
       return triggerHook(hookName, {
@@ -115,7 +119,6 @@ interface ModelData {
   modelName: string;
   model: LanguageModelV1;
   history: CoreMessage[];
-  isHookDataSet: boolean;
   hookData?: HooksDataString;
 }
 
@@ -191,6 +194,7 @@ async function callApi(
   const resp = await fetch(url, options);
 
   const jsonResp = await resp.json();
+
   return jsonResp;
 }
 
@@ -205,6 +209,13 @@ async function triggerHook(hook: string, data: HookData | TriggerRespError) {
   }
 
   try {
+    const [currentHook] =
+      (await db`SELECT * FROM hooks where name = ${hook}`) as Hook[];
+
+    if (!currentHook.api_calling) {
+      return currentHook.response;
+    }
+
     if (typeof data.payload === "string") {
       data.payload = JSON.parse(data.payload);
     }
@@ -301,7 +312,6 @@ type ModelInitConfig = {
 export class Model {
   private static models: ModelStore = new Map();
   private modelData: ModelData;
-  public isHookDataSet: boolean;
   public closed: boolean;
   public closeMessage: string;
 
@@ -313,13 +323,6 @@ export class Model {
     apiKey,
     modelId,
   }: ModelInitConfig) {
-    //const exModel = Model.getModel(chatId);
-    /*if (exModel) {
-      this.modelData = exModel;
-      this.isHookDataSet = exModel.isHookDataSet;
-      return;
-    }*/
-
     if (!chatId || !modelId || !modelName || !botId || !provider || !apiKey) {
       throw new Error(
         "chatId, modelId, modelName, provider, apiKey and botId are required parameters",
@@ -338,42 +341,33 @@ export class Model {
       modelName,
       history: [],
       model,
-      isHookDataSet: false,
     };
 
-    this.isHookDataSet = false;
     this.modelData = modelData;
     this.closed = false;
     Model.models.set(chatId, this);
   }
 
-  initializeHooks(hookData: HooksDataString) {
-    if (this.modelData.isHookDataSet) {
-      return;
-    }
-    this.isHookDataSet = true;
-    this.modelData.hookData = hookData; //this.modelData is a pointer to (static models) object, so that will be updated as well.
-    this.modelData.isHookDataSet = true;
-  }
-
-  async sendMessage(userPrompt: string, _: boolean = false) {
+  async sendMessage(userPrompt: string, _: boolean = false): Promise<string> {
     //streamed message functionality to be implemented.
-
-    const prompt = this.generatePrompt(
-      userPrompt,
-      this.modelData.modelName,
-      this.modelData.hookData as string,
-    );
-
-    this.modelData.history.push({ role: "user", content: prompt });
+    this.modelData.history.push({ role: "user", content: userPrompt });
+    const context = getContext();
 
     const result = await generateText({
       model: this.modelData.model,
       //prompt: prompt, // used without message history.
-      system: config.gemini.system_instructions.chat_model,
+      system: `System: ${context.instruction}\nRules: ${context.rules}\nExamples and flows:${context.examples}`,
       tools: function_tools,
-      maxSteps: 2,
+      maxSteps: 5,
       messages: this.modelData.history,
+      onStepFinish(event) {
+        for (const call of event.toolCalls) {
+          console.log("CALL:", call);
+        }
+        for (const result of event.toolResults) {
+          console.log("RESULT:", result);
+        }
+      },
     });
 
     for (const msg of result.responseMessages) {
@@ -383,28 +377,20 @@ export class Model {
     return result.text;
   }
 
-  private initModelNameInstruction(name: string) {
-    return `${name}: E-commerce Customer Service AI Assistant
-			You are ${name}`;
+  public initModelInstruction(hookData: HooksDataString): void {
+    this.modelData.hookData = hookData;
+    const instruction = [
+      { role: "system", content: "Hooks: " + this.modelData.hookData + "" },
+      {
+        role: "system",
+        content: `${this.modelData.modelName}: E-commerce Customer Service AI Assistant. You are ${this.modelData.modelName}`,
+      },
+    ] as CoreMessage[];
+
+    this.modelData.history.push(...instruction);
   }
 
-  private generatePrompt(
-    userPrompt: string,
-    modelName: string,
-    hookData: HooksDataString,
-  ) {
-    return (
-      this.initModelNameInstruction(modelName) +
-      "\n" +
-      "Hooks: " +
-      hookData +
-      "\n" +
-      "Prompt: " +
-      userPrompt
-    );
-  }
-
-  static getModel(chatId: string) {
+  static getModel(chatId: string): Model | undefined {
     return Model.models.get(chatId);
   }
 

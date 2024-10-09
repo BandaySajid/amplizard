@@ -1,213 +1,42 @@
 [
   {
-    "query": "I want to cancel an order",
-    "target": "cancel the order",
-    "flow": {
-      "step1": {
-        "input": {
-          "role": "user",
-          "message": "I want to cancel an order."
-        },
-        "flow": {
-          "step1": "figure out hook to get user data and trigger it and remember the response",
-          "step2": "figure out hook to get all orders data for a user, or if no related hook is found, just ask the user for the order id, trigger the hook and remember the response",
-          "step3": "Tell user which order would he like to cancel from the orders data you got!"
-        },
-        "output": {
-          "role": "model",
-          "message": "Which order would you like to cancel from these?"
-        }
-      },
-      "step2": {
-        "input": {
-          "role": "user",
-          "message": "I would like to cancel order with id 101"
-        },
-        "flow": {
-          "step": "Ask user why he/she wants to cancel that order."
-        },
-        "output": {
-          "role": "model",
-          "message": "Why do you want to cancel this order ?"
-        }
-      },
-      "step3": {
-        "input": {
-          "role": "user",
-          "message": "I want to cancel it because the price has reduced now."
-        },
-        "flow": {
-          "step1": "figure out the hook to get order data with that order id, trigger the hook and remember the response.",
-          "step2": "check if the order is eligible for cancellation by analyzing the data.",
-          "step3": "if the order is eligible for cancellation, then figure out the order cancellation hook and trigger the hook with the needed data.",
-          "step4": "Tell the user about if order was cancelled or if it can't be cancelled."
-        },
-        "output": {
-          "role": "model",
-          "if (condition)": {
-            "condition": "eligible for cancellation",
-            "message": "Your order with order id 101 has been cancelled"
-          },
-          "else": {
-            "condition": "not eligible for cancellation",
-            "message": "Sorry your order is not eligible for cancellation, I am sorry."
-          }
-        }
-      }
-    }
+    "role": "user",
+    "content": [{ "type": "text", "text": "Hi" }]
   },
   {
-    "query": "I want to track my order",
-    "target": "track the order",
-    "flow": {
-      "step1": {
-        "input": {
-          "role": "user",
-          "message": "I want to track my order."
-        },
-        "flow": {
-          "step1": "figure out hook to get user data and trigger it and remember the response",
-          "step2": "figure out hook to get all orders data for a user, or if no related hook is found, just ask the user for the order id,trigger the hook and remember the response",
-          "step3": "Tell user which order would they like to track from the orders data you got!"
-        },
-        "output": {
-          "role": "model",
-          "message": "Which order would you like to track from these?"
-        }
-      },
-      "step2": {
-        "input": {
-          "role": "user",
-          "message": "I would like to track order with id 102"
-        },
-        "flow": {
-          "step1": "trigger the hook to get tracking information for the specified order ID.",
-          "step2": "Tell user the status of that order."
-        },
-        "output": {
-          "role": "model",
-          "message": "The current status of your order with id 102 is: 'In Transit'."
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool-call",
+        "toolCallId": "jErN5Yv",
+        "toolName": "triggerHook",
+        "args": {
+          "hookName": "getCurrentUserData",
+          "data": "{\"url\":\"http://192.168.1.6:7254/currentUser\",\"method\":\"GET\",\"payload\":{},\"headers\":{\"content-type\":\"application/json\"}}"
         }
       }
-    }
+    ]
   },
   {
-    "query": "I want to change my delivery address",
-    "target": "update delivery address",
-    "flow": {
-      "step1": {
-        "input": {
-          "role": "user",
-          "message": "I want to change my delivery address."
-        },
-        "flow": {
-          "step1": "figure out hook to get user data and trigger it and remember the response",
-          "step2": "figure out hook to get all order details or if no related hook is found, just ask the user for the order id, and remember the response",
-          "step3": "Ask the user for which order they want to change the delivery address"
-        },
-        "output": {
-          "role": "model",
-          "message": "For which order do you want to change the delivery address ?"
-        }
-      },
-      "step2": {
-        "input": {
-          "role": "user",
-          "message": "For order with id 101"
-        },
-        "flow": {
-          "step1": "figure out hook to get order data and trigger it and remember the response",
-          "step2": "Ask the user to provide the new address"
-        },
-        "output": {
-          "role": "model",
-          "message": "Please provide the new delivery address."
-        }
-      },
-      "step3": {
-        "input": {
-          "role": "user",
-          "message": "123 New Street, New City, NC 12345"
-        },
-        "flow": {
-          "step1": "trigger the hook to update the delivery address for the specified order.",
-          "step2": "Tell user that their address has been changed"
-        },
-        "output": {
-          "role": "model",
-          "message": "Your delivery address has been updated to 123 New Street, New City, NC 12345."
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "jErN5Yv",
+        "toolName": "triggerHook",
+        "result": {
+          "id": 1,
+          "name": "Something",
+          "email": "something@example.com",
+          "joined": "2022-01-15"
         }
       }
-    }
+    ]
   },
   {
-    "query": "I want to return an order",
-    "target": "return the order",
-    "flow": {
-      "step1": {
-        "input": { "role": "user", "message": "I want to return an order" },
-        "flow": {
-          "step1": "figure out hook to get user data and trigger it and remember the response",
-          "step2": "figure out hook to get all order details or if no related hook is found, just ask the user for the order id, and remember the response",
-          "step3": "Ask the user which order they want to return from those orders"
-        },
-        "output": {
-          "role": "model",
-          "message": "Which order do you want to return ?"
-        }
-      },
-      "step2": {
-        "input": {
-          "role": "user",
-          "message": "Order with id 101"
-        },
-        "flow": {
-          "step1": "figure out hook to get order data and trigger it and remember the response",
-          "step2": "Check if order is eligible for return!",
-          "step3": "If order is not eligible then just tell the user, otherwise if it is eligible then tell the user why they want to return it."
-        },
-        "output": {
-          "role": "model",
-          "message": "Why do you want to return this order ?"
-        }
-      },
-      "step3": {
-        "input": {
-          "role": "user",
-          "message": "When I got it, I saw that it was damaged!"
-        },
-        "flow": {
-          "step1": "Verify whether the user is truthful and right!",
-          "step2": "Ask user to provide the image of the damage."
-        },
-        "output": {
-          "role": "model",
-          "message": "Ok, to verify, I need the image of that damaged order."
-        }
-      },
-      "step4": {
-        "input": {
-          "role": "user",
-          "message": "user sends the image."
-        },
-        "flow": {
-          "step1": "Send the image to AI for analyis and record the response.",
-          "step2": "If the user is proved right, then return the order, otherwise just let the user know verification failed!"
-        },
-        "output": {
-          "role": "model",
-          "message": "The return request has been successfully intiated."
-        }
-      },
-      "step5": {
-        "flow": {
-          "step1": "close the chat ."
-        },
-        "output": {
-          "role": "model",
-          "message": "The chat has been closed."
-        }
-      }
-    }
+    "role": "assistant",
+    "content": [
+      { "type": "text", "text": "Hi Something, how can I help you today? \n" }
+    ]
   }
 ]

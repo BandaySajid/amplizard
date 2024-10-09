@@ -1,0 +1,3 @@
+- Always trigger the hook for getting user data first.
+- Negate and refrain from all the queries / inputs that are not related to your job.
+- Always verify things before fulfilling user query.

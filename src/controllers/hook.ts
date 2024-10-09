@@ -12,6 +12,7 @@ export async function handleCreateHook(
   next: express.NextFunction,
 ) {
   try {
+    console.log("hoook:", req.body);
     const { bot_id } = req.params;
 
     const [bot] = await db`SELECT * FROM bots where bot_id = ${bot_id}`;
@@ -22,13 +23,22 @@ export async function handleCreateHook(
 
     const hook = req.body as Hook;
 
-    if (!reqMethods.includes(hook.method)) {
-      return respError(404, "invalid request method", res);
+    if (hook.api_calling) {
+      hook.api_calling = true;
+      hook.rephrase = false;
+      if (!reqMethods.includes(hook.method)) {
+        return respError(404, "invalid request method", res);
+      }
+    } else {
+      hook.api_calling = false;
+      if (hook.rephrase) {
+        hook.rephrase = true;
+      }
     }
 
     hook.bot_id = bot.bot_id;
 
-    if (hook.method) hook.hook_id = crypto.randomUUID();
+    hook.hook_id = crypto.randomUUID();
 
     await db`INSERT INTO hooks ${db(hook)}`;
 
@@ -88,6 +98,7 @@ export async function renderHooks(
 ) {
   try {
     const hooks = (await getHooks(req.params.bot_id)) as Hook[];
+    console.log("got hooks", hooks);
     return res.render("bot/hooks", {
       title: "Hooks",
       hooks,
@@ -164,10 +175,10 @@ export async function handleUpdateHook(
       "method",
       "headers",
       "description",
-      "vision",
+      "response",
+      "rephrase",
+      "api_calling",
     ];
-
-    req.body.vision = req.body.vision ? true : false;
 
     const requested_updates = Object.keys(req.body);
 
@@ -194,9 +205,19 @@ export async function handleUpdateHook(
     }
 
     const hook: Hook = req.body;
-
-    if (!reqMethods.includes(hook.method)) {
-      return respError(404, "invalid request method", res);
+    if (hook.api_calling) {
+      hook.api_calling = true;
+      hook.rephrase = false;
+      if (!reqMethods.includes(hook.method)) {
+        return respError(404, "invalid request method", res);
+      }
+    } else {
+      hook.api_calling = false;
+      if (hook.rephrase) {
+        hook.rephrase = true;
+      } else {
+        hook.rephrase = false;
+      }
     }
 
     if (!hook.description) {

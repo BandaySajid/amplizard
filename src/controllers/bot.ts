@@ -243,9 +243,9 @@ export async function handleDeleteBot(
   }
 }
 
-function createNewChat(botId: string, botName: string): string {
+async function createNewChat(botId: string, botName: string): Promise<string> {
   const chatId = crypto.randomUUID();
-  new Model({
+  const model = new Model({
     provider: "GOOGLE",
     modelName: botName,
     botId,
@@ -253,6 +253,21 @@ function createNewChat(botId: string, botName: string): string {
     apiKey: config.gemini.api_key,
     modelId: "gemini-1.5-flash",
   });
+
+  let hooks = await getHooks(botId);
+
+  hooks = hooks.map((hook) => {
+    try {
+      hook.payload = JSON.parse(hook.payload);
+
+      hook.headers = JSON.parse(hook.headers);
+    } catch (err) {}
+
+    return hook;
+  });
+
+  model.initModelInstruction(JSON.stringify(hooks));
+
   return chatId;
 }
 
@@ -298,7 +313,7 @@ export async function handleCreateChatSession(
       );
     }
 
-    const newChatId = createNewChat(exBot.bot_id, exBot.name);
+    const newChatId = await createNewChat(exBot.bot_id, exBot.name);
 
     const accessToken = util.generate_jwt({
       chatId: newChatId,
@@ -338,21 +353,6 @@ export async function handleChat(
     }
 
     //setting hooks data only when a new chat session is created.
-    if (!model.isHookDataSet) {
-      let hooks = await getHooks(bot_id);
-
-      hooks = hooks.map((hook) => {
-        try {
-          hook.payload = JSON.parse(hook.payload);
-
-          hook.headers = JSON.parse(hook.headers);
-        } catch (err) {}
-
-        return hook;
-      });
-
-      model.initializeHooks(JSON.stringify(hooks));
-    }
 
     // if customer sent an image.
     if (req.file) {

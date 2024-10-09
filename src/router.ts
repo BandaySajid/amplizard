@@ -45,7 +45,6 @@ hook_router.post(
 );
 hook_router.put(
   "/bots/:bot_id/hooks/:hook_id",
-  //
   validator.validateHook,
 
   hook_controller.handleUpdateHook,

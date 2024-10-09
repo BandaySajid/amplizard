@@ -138,9 +138,11 @@ export const validateHook = defineValidation([
     .isLength({ min: 3 })
     .withMessage("hook description is required")
     .escape(),
+  body("api_calling"),
   body("url")
-    .matches(notXSS)
+    .if(body("api_calling").equals("on"))
     .notEmpty()
+    .matches(notXSS)
     .trim()
     .isLength({ min: 3 })
     .withMessage("hook url is required")
@@ -149,25 +151,36 @@ export const validateHook = defineValidation([
     })
     .withMessage("invalid hook url"),
   body("payload")
-    .matches(notXSS)
+    .if(body("api_calling").equals("on"))
     .exists()
+    .matches(notXSS)
+    .isLength({ min: 3 })
     .withMessage("hook payload is required")
     .isJSON()
     .withMessage("hook payload should be in json format"),
   body("method")
+    .if(body("api_calling").equals("on"))
+    .exists()
     .matches(notXSS)
     .matches(noSpaces)
-    .exists()
     .notEmpty()
+    .isLength({ min: 3 })
     .withMessage("hook method is required")
     .escape(),
-
   body("headers")
-    .matches(notXSS)
+    .if(body("api_calling").equals("on"))
     .exists()
+    .matches(notXSS)
+    .isLength({ min: 3 })
     .withMessage("hook headers are required")
     .isJSON()
     .withMessage("hook headers should be in json format"),
+  body("response")
+    .if(body("api_calling").isEmpty())
+    .exists()
+    .notEmpty()
+    .withMessage("response is required"),
+  body("rephrase").optional(),
 ]);
 
 export const validateUpdatePassword = defineValidation([

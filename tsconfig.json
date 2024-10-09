@@ -13,7 +13,8 @@
       "downlevelIteration": true,
       "allowJs": true,
 			"typeRoots": ["./src/types"],
-			"sourceMap": true
+			"sourceMap": true,
+			"resolveJsonModule": true,
       // "incremental": true
    },
 	"include": ["src/**/*.ts", "src/**/*.js"],

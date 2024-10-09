@@ -7,7 +7,9 @@ export type Hook = {
   description?: string;
   method: string;
   url: string;
-  vision: boolean;
+  api_calling: boolean;
+  rephrase: boolean;
   payload: string;
   headers: string;
+  response: string;
 };

@@ -1,20 +1,17 @@
+// import queries from "./json/queries.json" assert { type: "json" };
 import fs from "node:fs";
-import config from "../../config.js";
 import path from "node:path";
+import config from "../../config.js";
 
 const __dirname = config.dirname(import.meta.url);
-const filesInDir = fs.readdirSync(path.join(__dirname, "./json"));
 
-let context: string[] | string = [];
+const instruction = fs.readFileSync(
+  path.join(__dirname, "./txt/instruction.txt"),
+);
 
-for (const file of filesInDir) {
-  context.push(
-    fs.readFileSync(path.join(__dirname, `./json/${file}`), "utf-8"),
-  );
-}
-
-context = JSON.stringify(context);
+const rules = fs.readFileSync(path.join(__dirname, "./txt/rules.txt"));
+const examples = fs.readFileSync(path.join(__dirname, "./txt/examples.txt"));
 
 export function getContext() {
-  return context as string;
+  return { instruction, rules, examples };
 }
