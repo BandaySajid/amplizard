@@ -18,6 +18,11 @@ bot_router.put(
   validator.validateBot,
   bot_controller.handleUpdateBot,
 );
+bot_router.put(
+  "/bots/:id/knowledge",
+  validator.validateBotKnowledge,
+  bot_controller.handleUpdateBotKnowledge,
+);
 bot_router.delete(
   "/bots/:id",
 
@@ -92,7 +97,14 @@ views_router.get(
 
   bot_controller.renderCreateBot,
 );
+
 views_router.get("/bots/:id", bot_controller.renderEditBots);
+
+views_router.get(
+  "/bots/:id/knowledge",
+
+  bot_controller.renderUpdateBotKnowledge,
+);
 
 views_router.get(
   "/bots/:bot_id/hooks/new",

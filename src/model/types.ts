@@ -23,3 +23,20 @@ export enum GEN_AI_PROVIDER {
   MISTRAL = "MISTRAL",
   COHERE = "COHERE",
 }
+
+export type ModelConfig = {
+  temperature?: number;
+  maxSteps?: number;
+};
+
+export type ModelInitConfig = {
+  modelName?: string;
+  provider: string;
+  botId?: string;
+  chatId?: string;
+  apiKey: string;
+  modelId: string;
+  instruction?: string;
+  config?: ModelConfig;
+  knowledge?: string;
+};

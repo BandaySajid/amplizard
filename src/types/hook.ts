@@ -4,7 +4,7 @@ export type Hook = {
   hook_id: crypto.UUID;
   bot_id: crypto.UUID;
   name: string;
-  description?: string;
+  signal: string;
   method: string;
   url: string;
   api_calling: boolean;

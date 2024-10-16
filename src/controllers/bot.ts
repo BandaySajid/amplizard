@@ -7,13 +7,14 @@ import { respError, renderStatus } from "../util.js";
 import redis from "../db/redis.js";
 import * as util from "../util.js";
 import { body, validationResult } from "express-validator";
-import { Model } from "../model/model.js";
+import { prepareChatAgent, getChatAgent } from "../model/agent.js";
 import config from "../config.js";
 
 type Bot = {
   bot_id: crypto.UUID;
   name: string;
   description?: string;
+  knowledge?: string;
 };
 
 type ChatSessionTokenData = {
@@ -25,7 +26,7 @@ type ChatSessionTokenData = {
 const MAX_FILE_SIZE = 20 * (1000 * 1000);
 const LOCALHOST = `http://localhost:${config.server.port}`;
 const REMOTEHOST = `https://amplizard.com`;
-const CACHE_EXPIRE_TIME = 7200; //will be 2 hours
+//const CACHE_EXPIRE_TIME = 7200; //will be 2 hours
 
 const ImageMimeTypes = [
   "image/png",
@@ -35,22 +36,12 @@ const ImageMimeTypes = [
   "image/heif",
 ];
 
-async function getHooks(bot_id: string): Promise<Hook[]> {
+/*async function getHooks(bot_id: string): Promise<Hook[]> {
   const hooks =
     (await db`SELECT * FROM hooks where bot_id = ${bot_id}`) as Hook[];
 
   return hooks;
-}
-
-async function setBotCache(bot: Bot): Promise<void> {
-  const identifier = `bot:${bot.bot_id}`;
-  await redis.hset(`bot:${bot.bot_id}`, bot);
-  await redis.expire(identifier, CACHE_EXPIRE_TIME);
-}
-
-async function getBotCache(botId: string): Promise<Bot | undefined> {
-  return (await redis.hgetall(`bot:${botId}`)) as Bot;
-}
+}*/
 
 async function deleteBotCache(botId: string): Promise<void> {
   await redis.del(botId);
@@ -96,13 +87,51 @@ export function renderCreateBot(_: express.Request, res: express.Response) {
 }
 
 export async function renderBots(_: express.Request, res: express.Response) {
-  let bots;
   try {
-    bots = await db`SELECT * FROM bots`;
+    const bots = await db`SELECT * FROM bots`;
     return res.render("bot/bots", { title: "Bots", bots });
   } catch (err) {
-    console.error("an error occured!");
+    console.error("an error occured while rendering!", err);
     return res.send("error");
+  }
+}
+
+export async function renderUpdateBotKnowledge(
+  req: express.Request,
+  res: express.Response,
+) {
+  try {
+    const bot_id = req.params.id;
+    const [bot] =
+      (await db`SELECT knowledge FROM bots where bot_id = ${bot_id}`) as Bot[];
+    const k = bot.knowledge;
+    res.render("bot/knowledge", {
+      title: "Knowledge",
+      knowledge: k ? k : "",
+      url: "/api/v1/bots/" + bot_id + "/knowledge",
+      method: "put",
+    });
+  } catch (err) {
+    console.error("an error occured while rendering!", err);
+    return res.send("error");
+  }
+}
+
+export async function handleUpdateBotKnowledge(
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction,
+) {
+  try {
+    const { knowledge } = req.body;
+
+    await db`UPDATE bots SET knowledge = ${knowledge} where bot_id = ${req.params.id}`;
+    return res.json({
+      status: "success",
+      description: "bot knowledge updated successfully!",
+    });
+  } catch (err) {
+    next(err);
   }
 }
 
@@ -243,30 +272,23 @@ export async function handleDeleteBot(
   }
 }
 
-async function createNewChat(botId: string, botName: string): Promise<string> {
+async function createNewChat(
+  botId: string,
+  botName: string,
+  knowledge?: string,
+): Promise<string> {
   const chatId = crypto.randomUUID();
-  const model = new Model({
+
+  prepareChatAgent({
     provider: "GOOGLE",
     modelName: botName,
     botId,
     chatId,
     apiKey: config.gemini.api_key,
     modelId: "gemini-1.5-flash",
+    knowledge,
+    config: { maxSteps: 5 },
   });
-
-  let hooks = await getHooks(botId);
-
-  hooks = hooks.map((hook) => {
-    try {
-      hook.payload = JSON.parse(hook.payload);
-
-      hook.headers = JSON.parse(hook.headers);
-    } catch (err) {}
-
-    return hook;
-  });
-
-  model.initModelInstruction(JSON.stringify(hooks));
 
   return chatId;
 }
@@ -303,17 +325,22 @@ export async function handleCreateChatSession(
       return respError(404, "bot with this id does not exist!", res);
     }
 
-    const botHooks = await getHooks(bot_id);
+    //TODO: check if this is required.
+    // if (botHooks.length <= 0) {
+    //   return respError(
+    //     400,
+    //     "Bot has not been configured yet. Hook configuration is requried",
+    //     res,
+    //   );
+    // }
 
-    if (botHooks.length <= 0) {
-      return respError(
-        400,
-        "Bot has not been configured yet. Hook configuration is requried",
-        res,
-      );
-    }
-
-    const newChatId = await createNewChat(exBot.bot_id, exBot.name);
+    const [bot] =
+      (await db`SELECT knowledge from bots where bot_id = ${bot_id}`) as Bot[];
+    const newChatId = await createNewChat(
+      exBot.bot_id,
+      exBot.name,
+      bot.knowledge,
+    );
 
     const accessToken = util.generate_jwt({
       chatId: newChatId,
@@ -340,19 +367,17 @@ export async function handleChat(
   try {
     const htmxRequest = req.headers["hx-request"];
     let { prompt } = req.body;
-    const { bot_id, chat_id } = req.params;
+    const { chat_id } = req.params;
 
     if (!(prompt?.trim().length > 0) && !req.file) {
       return respError(400, "message or a file is required!", res);
     }
 
-    let model = Model.getModel(chat_id);
+    let model = getChatAgent(chat_id);
 
     if (!model) {
       return respError(404, "chat history does not exist!", res);
     }
-
-    //setting hooks data only when a new chat session is created.
 
     // if customer sent an image.
     if (req.file) {
@@ -374,25 +399,25 @@ export async function handleChat(
 
     const message = await model.sendMessage(prompt);
 
-    const modelName = model.getModelDetails().modelName;
+    const modelName = model.modelName;
 
-    if (model.closed) {
-      console.log("model has been closed with reason:", model.closeMessage);
-      if (htmxRequest) {
-        return res.status(200).render("components/chatClosed", {
-          message: model.closeMessage,
-          redirectUrl: "/",
-          sender: "system",
-        });
-      }
-
-      return res.status(200).json({
-        status: "success",
-        sender: "system",
-        name: modelName,
-        closed: true,
-      });
-    }
+    // if (model.closed) {
+    //   console.log("model has been closed with reason:", model.closeMessage);
+    //   if (htmxRequest) {
+    //     return res.status(200).render("components/chatClosed", {
+    //       message: model.closeMessage,
+    //       redirectUrl: "/",
+    //       sender: "system",
+    //     });
+    //   }
+    //
+    //   return res.status(200).json({
+    //     status: "success",
+    //     sender: "system",
+    //     name: modelName,
+    //     closed: true,
+    //   });
+    // }
 
     if (htmxRequest) {
       return res.status(200).render("partials/Message", {
@@ -423,7 +448,7 @@ export async function handleRenderChat(
   try {
     const chatId = req.params.chat_id as string;
 
-    const chatSession = Model.getModel(chatId)?.getModelDetails();
+    const chatSession = getChatAgent(chatId);
 
     if (!chatSession) {
       return res.status(404).render("404", {
@@ -433,7 +458,7 @@ export async function handleRenderChat(
       });
     }
 
-    const bot = (await util.getBotCache(chatSession.botId)) as Bot;
+    const bot = (await util.getBotCache(chatSession.botId as string)) as Bot;
 
     if (!bot) {
       return respError(404, "bot does not exist!", res);

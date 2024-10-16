@@ -121,6 +121,10 @@ export const validateBot = defineValidation([
     .escape(),
 ]);
 
+export const validateBotKnowledge = defineValidation([
+  body("knowledge").exists(),
+]);
+
 export const validateHook = defineValidation([
   body("name")
     .matches(notXSS)
@@ -131,13 +135,12 @@ export const validateHook = defineValidation([
     .isLength({ min: 3 })
     .withMessage("hook name is required!")
     .escape(),
-  body("description")
+  body("signal")
     .matches(notXSS)
     .notEmpty()
     .trim()
     .isLength({ min: 3 })
-    .withMessage("hook description is required")
-    .escape(),
+    .withMessage("hook signal is required"),
   body("api_calling"),
   body("url")
     .if(body("api_calling").equals("on"))
@@ -154,7 +157,7 @@ export const validateHook = defineValidation([
     .if(body("api_calling").equals("on"))
     .exists()
     .matches(notXSS)
-    .isLength({ min: 3 })
+    .isLength({ min: 2 })
     .withMessage("hook payload is required")
     .isJSON()
     .withMessage("hook payload should be in json format"),

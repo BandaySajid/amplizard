@@ -1,125 +1,850 @@
 [
   {
-    "id": "cancel_order",
-    "query": "I want to cancel an order",
-    "target": "cancel the order",
-    "steps": [
+    "role": "user",
+    "content": "Hi"
+  },
+  {
+    "role": "assistant",
+    "content": [
       {
-        "step": "Gather user information",
-        "actions": [
-          "Trigger user data retrieval",
-          "Retrieve all orders for the user"
-        ],
-        "response": "Which order would you like to cancel from these?"
+        "type": "text",
+        "text": ""
       },
       {
-        "step": "User specifies order ID",
-        "actions": ["Ask the user why they want to cancel that order."],
-        "response": "Why do you want to cancel this order?"
-      },
-      {
-        "step": "User provides reason",
-        "actions": [
-          "Retrieve order data using the provided order ID",
-          "Check if the order is eligible for cancellation",
-          "If eligible, trigger cancellation process"
-        ],
-        "responses": {
-          "eligible": "Your order with order ID {id} has been cancelled.",
-          "not_eligible": "Sorry, your order is not eligible for cancellation."
+        "type": "tool-call",
+        "toolCallId": "0",
+        "toolName": "fetchHook",
+        "args": {
+          "intent": "Need user data"
         }
       }
     ]
   },
   {
-    "id": "track_order",
-    "query": "I want to track my order",
-    "target": "track the order",
-    "steps": [
+    "role": "tool",
+    "content": [
       {
-        "step": "Gather user information",
-        "actions": [
-          "Trigger user data retrieval",
-          "Retrieve all orders for the user"
-        ],
-        "response": "Which order would you like to track from these?"
-      },
-      {
-        "step": "User specifies order ID",
-        "actions": ["Trigger tracking information retrieval"],
-        "response": "The current status of your order with ID {id} is: '{status}'."
-      }
-    ]
-  },
-  {
-    "id": "update_address",
-    "query": "I want to change my delivery address",
-    "target": "update delivery address",
-    "steps": [
-      {
-        "step": "Gather user information",
-        "actions": [
-          "Trigger user data retrieval",
-          "Retrieve all order details"
-        ],
-        "response": "For which order do you want to change the delivery address?"
-      },
-      {
-        "step": "User specifies order ID",
-        "actions": ["Retrieve order data", "Ask user for new address"],
-        "response": "Please provide the new delivery address."
-      },
-      {
-        "step": "User provides new address",
-        "actions": ["Trigger update address process"],
-        "response": "Your delivery address has been updated to {new_address}."
-      }
-    ]
-  },
-  {
-    "id": "return_order",
-    "query": "I want to return an order",
-    "target": "return the order",
-    "steps": [
-      {
-        "step": "Gather user information",
-        "actions": [
-          "Trigger user data retrieval",
-          "Retrieve all order details"
-        ],
-        "response": "Which order do you want to return?"
-      },
-      {
-        "step": "User specifies order ID",
-        "actions": [
-          "Retrieve order data",
-          "Check if order is eligible for return"
-        ],
-        "response": "Why do you want to return this order?"
-      },
-      {
-        "step": "User provides reason",
-        "actions": [
-          "Verify the reason",
-          "Request image of damage if applicable"
-        ],
-        "response": "Ok, to verify, I need the image of that damaged order."
-      },
-      {
-        "step": "User submits image",
-        "actions": [
-          "Analyze image for verification",
-          "Initiate return process if verified"
-        ],
-        "responses": {
-          "successful": "The return request has been successfully initiated.",
-          "failed": "Verification failed, return request cannot be processed."
+        "type": "tool-result",
+        "toolCallId": "0",
+        "toolName": "fetchHook",
+        "result": {
+          "result": {
+            "hook": {
+              "name": "getCurrentUserData",
+              "url": "http://192.168.1.6:7254/currentUser",
+              "method": "GET",
+              "payload": {},
+              "headers": {
+                "content-type": "application/json"
+              },
+              "signal": "When the current user data is needed / required"
+            }
+          }
         }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": ""
       },
       {
-        "step": "Close chat",
-        "actions": ["End the conversation"],
-        "response": "The chat has been closed."
+        "type": "tool-call",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "args": {
+          "hookName": "getCurrentUserData",
+          "data": {
+            "url": "http://192.168.1.6:7254/currentUser",
+            "method": "GET",
+            "payload": {},
+            "headers": {
+              "content-type": "application/json"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "result": {
+          "result": {
+            "id": 1,
+            "name": "David Manohan",
+            "email": "david@example.com",
+            "joined": "2022-10-14",
+            "auth_token": "22221238921311892138"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Hello! How can I help you today? __ \n"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "content": "I want to cancel an order with id 101?"
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Why do you want to cancel that order? __ \n"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "content": "The price has changed."
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": ""
+      },
+      {
+        "type": "tool-call",
+        "toolCallId": "0",
+        "toolName": "fetchHook",
+        "args": {
+          "intent": "Need order data"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "0",
+        "toolName": "fetchHook",
+        "result": {
+          "result": {
+            "hook": {
+              "name": "getOrderData",
+              "url": "http://192.168.1.6:7254/orders/{order_id}",
+              "method": "POST",
+              "payload": {
+                "userId": "{userId}"
+              },
+              "headers": {
+                "content-type": "application/json"
+              },
+              "signal": "When an individual order data is needed for a user."
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool-call",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "args": {
+          "hookName": "getOrderData",
+          "data": {
+            "url": "http://192.168.1.6:7254/orders/101",
+            "method": "POST",
+            "payload": {
+              "userId": 1
+            },
+            "headers": {
+              "content-type": "application/json"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "result": {
+          "result": {
+            "id": 101,
+            "userId": 1,
+            "item": "Laptop",
+            "amount": 1200,
+            "imageUrl": "https://images.pexels.com/photos/2280547/pexels-photo-2280547.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+            "date": "2024-08-16"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Alright I have verified that you have an order of Laptop with id 101 placed on 2024-08-16. Do you really wish to cancel it? __ \n"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "content": "Yes."
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": ""
+      },
+      {
+        "type": "tool-call",
+        "toolCallId": "0",
+        "toolName": "fetchHook",
+        "args": {
+          "intent": "Need to cancel an order"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "0",
+        "toolName": "fetchHook",
+        "result": {
+          "result": {
+            "hook": {
+              "name": "cancelOrderHook",
+              "url": "http://192.168.1.6:7254/orders/{order_id}/cancel",
+              "method": "POST",
+              "payload": {
+                "userId": "{userId}"
+              },
+              "headers": {
+                "content-type": "application/json"
+              },
+              "signal": "When an individual order has to be cancelled for a user."
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool-call",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "args": {
+          "hookName": "cancelOrderHook",
+          "data": {
+            "url": "http://192.168.1.6:7254/orders/101/cancel",
+            "method": "POST",
+            "payload": {
+              "userId": 1
+            },
+            "headers": {
+              "content-type": "application/json"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "result": {
+          "result": {
+            "status": "success",
+            "description": "Order with id 101 has been cancelled."
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Your order with id 101 has been cancelled. Is there anything else I can help you with? __ \n"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "content": "No thanks."
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Have a nice day. __ \n"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "content": "Can you track my order with id 102?"
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": ""
+      },
+      {
+        "type": "tool-call",
+        "toolCallId": "0",
+        "toolName": "fetchHook",
+        "args": {
+          "intent": "Need current user data"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "0",
+        "toolName": "fetchHook",
+        "result": {
+          "result": {
+            "hook": {
+              "name": "getCurrentUserData",
+              "url": "http://192.168.1.6:7254/currentUser",
+              "method": "GET",
+              "payload": {},
+              "headers": {
+                "content-type": "application/json"
+              },
+              "signal": "When the current user data is needed / required"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": ""
+      },
+      {
+        "type": "tool-call",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "args": {
+          "hookName": "getCurrentUserData",
+          "data": {
+            "url": "http://192.168.1.6:7254/currentUser",
+            "method": "GET",
+            "payload": {},
+            "headers": {
+              "content-type": "application/json"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "result": {
+          "result": {
+            "id": 20,
+            "name": "Beckam",
+            "email": "beckam@example.com",
+            "joined": "2023-02-14",
+            "auth_token": "12389213892138"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": ""
+      },
+      {
+        "type": "tool-call",
+        "toolCallId": "0",
+        "toolName": "fetchHook",
+        "args": {
+          "intent": "Need to track an order."
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "0",
+        "toolName": "fetchHook",
+        "result": {
+          "result": {
+            "hook": {
+              "name": "trackOrderHook",
+              "url": "http://192.168.1.6:7254/orders/{order_id}/track?userId={userId}",
+              "method": "GET",
+              "payload": {},
+              "headers": {
+                "content-type": "application/json"
+              },
+              "signal": "When the current user data is needed / required"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": ""
+      },
+      {
+        "type": "tool-call",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "args": {
+          "hookName": "trackOrderHook",
+          "data": {
+            "url": "http://192.168.1.6:7254/orders/102/track?userId=20",
+            "method": "GET",
+            "payload": {},
+            "headers": {
+              "content-type": "application/json"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "result": {
+          "result": {
+            "orderId": 102,
+            "status": "In Transit",
+            "estimatedDelivery": "2024-10-22",
+            "lastLocation": "Warehouse 23, Springfield"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Your order with id 102 is in Transit and the estimated delivery date is 22 October 2024 with last location status as 'Warehouse 23 Springfield' __ \n"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "content": "Thank you for helping me."
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "I am glad, have a nice day. __ \n"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "content": "I want to change my delivery address."
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": ""
+      },
+      {
+        "type": "tool-call",
+        "toolCallId": "0",
+        "toolName": "fetchHook",
+        "args": {
+          "intent": "Need current user data"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "0",
+        "toolName": "fetchHook",
+        "result": {
+          "result": {
+            "hook": {
+              "name": "getCurrentUserData",
+              "url": "http://192.168.1.6:7254/currentUser",
+              "method": "GET",
+              "payload": {},
+              "headers": {
+                "content-type": "application/json"
+              },
+              "signal": "When the current user data is needed / required"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": ""
+      },
+      {
+        "type": "tool-call",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "args": {
+          "hookName": "getCurrentUserData",
+          "data": {
+            "url": "http://192.168.1.6:7254/currentUser",
+            "method": "GET",
+            "payload": {},
+            "headers": {
+              "content-type": "application/json"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "result": {
+          "result": {
+            "id": 22,
+            "name": "Michael Scofield",
+            "email": "michael@example.com",
+            "joined": "2022-10-14",
+            "auth_token": "1238921311892138"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": ""
+      },
+      {
+        "type": "tool-call",
+        "toolCallId": "0",
+        "toolName": "fetchHook",
+        "args": {
+          "intent": "Need to change delivery address for a user"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "0",
+        "toolName": "fetchHook",
+        "result": {
+          "result": "No relevant hooks available to trigger"
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Sorry I am not capable of doing that, do you want me to forward this to our agent?. __ \n"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "content": "Yes please."
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "The query has been forwarded. __ \n"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "content": "I want to change my delivery address."
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "0",
+        "toolName": "fetchHook",
+        "result": {
+          "result": {
+            "hook": {
+              "name": "getCurrentUserData",
+              "url": "http://192.168.1.6:7254/currentUser",
+              "method": "GET",
+              "payload": {},
+              "headers": {
+                "content-type": "application/json"
+              },
+              "signal": "When the current user data is needed / required"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": ""
+      },
+      {
+        "type": "tool-call",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "args": {
+          "hookName": "getCurrentUserData",
+          "data": {
+            "url": "http://192.168.1.6:7254/currentUser",
+            "method": "GET",
+            "payload": {},
+            "headers": {
+              "content-type": "application/json"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "result": {
+          "result": {
+            "id": 22,
+            "name": "Michael Scofield",
+            "email": "michael@example.com",
+            "joined": "2022-10-14",
+            "auth_token": "1238921311892138"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": ""
+      },
+      {
+        "type": "tool-call",
+        "toolCallId": "0",
+        "toolName": "fetchHook",
+        "args": {
+          "intent": "Need to change delivery address for a user"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "0",
+        "toolName": "fetchHook",
+        "result": {
+          "result": {
+            "hook": {
+              "name": "updateDeliveryAddress",
+              "url": "http://192.168.1.6:7254/address",
+              "method": "PUT",
+              "payload": {
+                "userId": "{userId}",
+                "address": "{new_address}"
+              },
+              "headers": {
+                "content-type": "application/json"
+              },
+              "signal": "When the delivery address has to be updated for a user"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Ok what do you want your new delivery address to be? __ \n"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "content": "Warehouse 23, Springfield"
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": ""
+      },
+      {
+        "type": "tool-call",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "args": {
+          "hookName": "updateDeliveryAddress",
+          "data": {
+            "url": "http://192.168.1.6:7254/address",
+            "method": "PUT",
+            "payload": {
+              "userId": 22,
+              "address": "Warehouse 23, Springfield"
+            },
+            "headers": {
+              "content-type": "application/json"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "result": {
+          "result": {
+            "status": "success",
+            "description": "delivery address has been updated"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Your delivery address has been successfully changed. Is there anything else I can help you with? __ \n"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "content": "No, thank you for helping me out."
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Bye. __ \n"
       }
     ]
   }

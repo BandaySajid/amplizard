@@ -1,9 +1,7 @@
-
 ---
 
 **Cancel Order**
 
-- **ID:** cancel_order
 - **Query:** I want to cancel an order
 - **Target:** cancel the order
 - **Steps:**
@@ -30,7 +28,6 @@
 
 **Track Order**
 
-- **ID:** track_order
 - **Query:** I want to track my order
 - **Target:** track the order
 - **Steps:**
@@ -48,7 +45,6 @@
 
 **Update Address**
 
-- **ID:** update_address
 - **Query:** I want to change my delivery address
 - **Target:** update delivery address
 - **Steps:**
@@ -70,10 +66,10 @@
 
 **Return Order**
 
-- **ID:** return_order
 - **Query:** I want to return an order
 - **Target:** return the order
 - **Steps:**
+	
   1. **Step:** Gather user information
      - **Actions:**
        - Trigger user data retrieval
@@ -105,3 +101,4 @@
      - **Response:** The chat has been closed.
 
 ---
+

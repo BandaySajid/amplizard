@@ -12,7 +12,7 @@
         <div class="top-form flex-col flex p-1 gap-4">
           <div class="left grid grid-cols-1 sm:grid-cols-2 gap-2">
             {{> input name="name" label="Name" type="text" value=hook.name}}
-            {{> input name="description" label="Description" type="text" value=hook.description}}
+            {{> input name="signal" label="Signal (when to trigger)" type="text" value=hook.signal}}
           </div>
           <div class="input-container w-full flex gap-2 items-center">
             {{#if hook.api_calling}} {{> switch id="api_calling" on="true" text="Api calling" onClick="validate_api_calling" }}
@@ -62,8 +62,8 @@
           </div>
           <div class="no_api_container {{#if hook.api_calling}} hidden {{/if}}">
             {{> input name="response" label="Direct Response" type="text" value=hook.response}}
-            {{#if hook.rephrase}} {{> switch id="rephrase" on="true" text="Rephrase response" warning="(rephrase response with ai)"}}
-            {{else }} {{> switch id="rephrase" on="" text="Rephrase response" warning="(rephrase response with ai)"}}
+            {{#if hook.rephrase}} {{> switch id="rephrase" on="true" text="Rephrase response" warning="(AI)"}}
+            {{else }} {{> switch id="rephrase" on="" text="Rephrase response" warning=" (AI)"}}
             {{/if}}
           </div>
         </div>

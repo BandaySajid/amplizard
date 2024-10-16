@@ -1,0 +1,23 @@
+<section class='sm:ml-64 px-8 py-4 min-h-full'>
+  <div class=' mx-auto w-full'>
+    <div class='overflow-hidden'>
+      <div class='p-4 '>
+        {{> Back}}
+        <h2 class='text-3xl font-semibold text-white mb-6'>Bot Knowledge</h2>
+        <form onsubmit="event.preventDefault();" class="space-y-6">
+          <div class="input-container w-full">
+            <div class="p-2 w-full mx-auto flex-col gap-4">
+              <textarea type="text" id"knowledge"
+									style="background: rgb(13, 17, 23);"
+									placeholder="Data goes here." name="knowledge"
+									class="flex w-full mt-2 min-h-[200px] px-3 py-2 text-sm bg-black border rounded-md text-white border-neutral-300 placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50 h-[70%]">{{knowledge}}</textarea>
+            </div>
+          </div>
+          {{> button method=method url=url class="flex px-4 py-2 text-black bg-white text-sm rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" text="Save"}}
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+</div>
+</section>

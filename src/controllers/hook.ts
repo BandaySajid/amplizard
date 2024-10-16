@@ -12,7 +12,6 @@ export async function handleCreateHook(
   next: express.NextFunction,
 ) {
   try {
-    console.log("hoook:", req.body);
     const { bot_id } = req.params;
 
     const [bot] = await db`SELECT * FROM bots where bot_id = ${bot_id}`;
@@ -174,7 +173,7 @@ export async function handleUpdateHook(
       "payload",
       "method",
       "headers",
-      "description",
+      "signal",
       "response",
       "rephrase",
       "api_calling",
@@ -218,10 +217,6 @@ export async function handleUpdateHook(
       } else {
         hook.rephrase = false;
       }
-    }
-
-    if (!hook.description) {
-      hook.description = "";
     }
 
     hook.bot_id = bot.bot_id;

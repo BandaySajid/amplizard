@@ -30,6 +30,8 @@ TODO:
     - [ ] Make chat closing more dynamic, move from direct closeChat function calling approach to incrementing inappropriate message / input counter and calling the closeChat function manually when it goes beyond the limit.
     - [x] Feature to have direct responses for queries, no hook calling, just the response. 
     - [ ] Fix the annoying bug, form submit button not enabling upon switching a radio button / switch, or just remove the disabling feature.
+    - [ ] Currently we are passing hookData and knowledge base to each instance of the Model Class, check if that causes a problem, since all the model instances associated with a bot would have the same knowledge and hookData.
+    - [ ] Move system instruction and prompting to history approach, provide example hooks and real hooks, that approach would be easy and might work.
 
   - OVERALL:
     - [x] Businesses will request our server /chat endpoint with post method and start the chat. They will be having two options to get the data, as a stream or as a compleete response using direct post request or event stream.

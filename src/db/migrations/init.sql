@@ -1,9 +1,8 @@
 CREATE TABLE IF NOT EXISTS bots (
 	bot_id VARCHAR(50) UNIQUE NOT NULL,
-	api_key VARCHAR(50) UNIQUE,
-	url VARCHAR(50),
 	name VARCHAR(50) UNIQUE NOT NULL,
 	description VARCHAR(300),
+	knowledge TEXT,
 	created_at timestamp DEFAULT NOW(),
 	PRIMARY KEY(bot_id)
 );
@@ -12,7 +11,7 @@ CREATE TABLE IF NOT EXISTS hooks (
 	hook_id VARCHAR(50) UNIQUE NOT NULL,
 	bot_id VARCHAR(50) NOT NULL,
 	name VARCHAR(50) UNIQUE NOT NULL,
-	description VARCHAR(300),
+	signal VARCHAR(600) NOT NULL,
 	url VARCHAR(300),
 	method VARCHAR(10),
 	payload JSONB,
