@@ -14,13 +14,6 @@ export default {
     port: Number(process.env.ws_port) || 9091,
   },
 
-  jwt: {
-    access_token_secret:
-      process.env.ACCESS_TOKEN_SECRET || "2108319230213j213lj21jlk313",
-    refresh_token_secret:
-      process.env.REFRESH_TOKEN_SECRET || "kjdsflkdjsflkdf1908243890213",
-  },
-
   database: {
     user: process.env.POSTGRES_USER,
     host: process.env.POSTGRES_HOST || "localhost",
@@ -32,17 +25,6 @@ export default {
   redis: {
     host: process.env.redis_host || "localhost",
     url: process.env.redis_url || "redis://localhost:6379",
-  },
-
-  smtp: {
-    host: process.env.SMTP_HOST || "",
-    port: Number(process.env.SMTP_PORT),
-    username: process.env.SMTP_USERNAME || "",
-    password: process.env.SMTP_PASSWORD || "",
-  },
-
-  gemini: {
-    api_key: process.env.gemini_api_key || "",
   },
 
   dirname: (meta_url) => {

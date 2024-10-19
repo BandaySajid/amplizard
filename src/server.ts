@@ -30,6 +30,13 @@ app.engine(
       eq: function (v1: any, v2: any) {
         return v1 === v2;
       },
+      objGet: function (obj: any, varName: any) {
+        const elem = obj[varName];
+        if (!elem) {
+          return null;
+        }
+        return elem;
+      },
       setVar: function (varName: any, varValue: any, options: any) {
         options.data.root[varName] = varValue;
       },

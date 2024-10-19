@@ -25,7 +25,9 @@ Before you begin, ensure you have met the following requirements:
 - Docker (for containerized deployment)
 - Postgres and Redis for Non-docker setup.
 
-## Installation (development)
+## Installation
+
+### Installation (development)
 
 Follow these steps to set up Amplizard:
 
@@ -41,10 +43,11 @@ Follow these steps to set up Amplizard:
    ```bash
    npm install
    ```
-3. Copy env and config:
+3. Copy env:
    ```bash
    cp .env.sample .env
    ```
+4. Setup your env in .env file.
 
 - To start the development server, use the following command:
 
@@ -58,13 +61,21 @@ npm run dev
 
 3. Start docker compose:
 
-   ```bash
-   docker compose -f docker-compose.dev.yml up
-   ```
+- For the first time:
 
-## Installation (production)
+  ```bash
+    docker compose build
+  ```
 
-1. Copy env and config:
+- Finally:
+
+  ```bash
+      docker compose -f docker-compose.dev.yml up
+  ```
+
+### Installation (production)
+
+1. Copy env:
    ```bash
    cp .env.sample .env
    ```
@@ -80,3 +91,14 @@ npm run dev
   ```bash
   docker compose up
   ```
+
+## Contributing
+
+If you're interested in contributing to the Amplizard project:
+
+- Start by reading the [Contributing guide](https://github.com/bandaysajid/amplizard/blob/HEAD/contributing.md).
+- Learn how to set up your local environment.
+
+## LICENSE
+
+Amplizard is distributed under [GPLv3](https://github.com/bandaysajid/amplizard/blob/main/LICENSE).

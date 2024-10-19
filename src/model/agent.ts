@@ -1,12 +1,11 @@
 import { CoreMessage } from "ai";
 import { Model } from "./model.js";
-import { ModelInitConfig, ModelConfig } from "./types.js";
+import { ModelInitConfig } from "./types.js";
 import { getContext } from "./context/index.js";
 import { db } from "../db/connection.js";
 import { jsonrepair } from "jsonrepair";
 import { Hook } from "../types/hook.js";
 import { z } from "zod";
-import config from "../config.js";
 
 type ChatId = string;
 type ChatAgentStore = Map<ChatId, Model>;
@@ -41,6 +40,13 @@ export function prepareChatAgent(modelInitConfig: ModelInitConfig): Model {
   history.push(...(context.chatAgent.context as CoreMessage[]));
   if (!modelInitConfig.config) modelInitConfig.config = {};
 
+  const hookAgent = prepareHookAgent({
+    provider: modelInitConfig.provider,
+    apiKey: modelInitConfig.apiKey,
+    modelId: modelInitConfig.modelId,
+    config: { maxSteps: 5 },
+  });
+
   const fetchHookFunctionDeclaration = {
     description: "Fetch available hook to trigger according to the intent.",
     parameters: z
@@ -53,6 +59,7 @@ export function prepareChatAgent(modelInitConfig: ModelInitConfig): Model {
       const result = await fetchHookHandler(
         intent,
         modelInitConfig.botId as string,
+        hookAgent,
       );
 
       console.log("got result, fetching hooks", result);
@@ -66,6 +73,7 @@ export function prepareChatAgent(modelInitConfig: ModelInitConfig): Model {
   agent.addTool("fetchHook", fetchHookFunctionDeclaration);
   agent.addTool("triggerHook", triggerHookFunctionDeclaration);
   chatAgentStore.set(modelInitConfig.chatId as ChatId, agent);
+
   return agent;
 }
 
@@ -85,14 +93,11 @@ export function getChatAgent(chatId: ChatId) {
  * Image analysis agent.
  */
 
-const hookAgent = prepareHookAgent({
-  provider: "GOOGLE",
-  apiKey: config.gemini.api_key,
-  modelId: "gemini-1.5-flash",
-  config: { maxSteps: 5 },
-});
-
-async function fetchHookHandler(intent: string, bot_id: string) {
+async function fetchHookHandler(
+  intent: string,
+  bot_id: string,
+  hookAgent: Model,
+) {
   try {
     const hooks = await db`SELECT * FROM hooks where bot_id = ${bot_id}`;
     const modHooks = hooks.map((hook) => {

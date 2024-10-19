@@ -109,16 +109,27 @@ export const validateBot = defineValidation([
     .escape(),
 
   body("description").optional().matches(notXSS).escape(),
-
-  body("url")
-    .optional({ checkFalsy: true })
+  body("ai_provider")
     .matches(notXSS)
-    .trim()
-    .isURL({
-      require_tld: false,
-    })
-    .withMessage("invalid bot url!")
-    .escape(),
+    .matches(noSpaces)
+    .exists()
+    .notEmpty()
+    .withMessage("Ai provider is required!")
+    .trim(),
+  body("ai_model")
+    .matches(notXSS)
+    .matches(noSpaces)
+    .exists()
+    .notEmpty()
+    .withMessage("Ai model is required!")
+    .trim(),
+  body("api_key")
+    .matches(notXSS)
+    .matches(noSpaces)
+    .exists()
+    .notEmpty()
+    .withMessage("Api key for model is required!")
+    .trim(),
 ]);
 
 export const validateBotKnowledge = defineValidation([

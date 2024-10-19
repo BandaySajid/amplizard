@@ -9,12 +9,17 @@ import * as util from "../util.js";
 import { body, validationResult } from "express-validator";
 import { prepareChatAgent, getChatAgent } from "../model/agent.js";
 import config from "../config.js";
+import { MODEL_IDS } from "../model/model_types.js";
+const ai_providers = Object.keys(MODEL_IDS);
 
 type Bot = {
   bot_id: crypto.UUID;
   name: string;
   description?: string;
   knowledge?: string;
+  ai_provider: string;
+  ai_model: string;
+  api_key: string;
 };
 
 type ChatSessionTokenData = {
@@ -55,11 +60,14 @@ export async function handleCreateBot(
   try {
     const bot_id = crypto.randomUUID();
 
-    const { name, description } = req.body;
+    const { name, description, ai_provider, ai_model, api_key } = req.body;
 
     const bot = {
       bot_id,
       name,
+      ai_provider,
+      ai_model,
+      api_key,
     } as Bot;
 
     if (description) bot.description = description;
@@ -83,6 +91,7 @@ export function renderCreateBot(_: express.Request, res: express.Response) {
     type: "New",
     method: "post",
     url: `/api/v1/bots`,
+    ai_providers,
   });
 }
 
@@ -135,6 +144,41 @@ export async function handleUpdateBotKnowledge(
   }
 }
 
+export function renderAIModels(
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction,
+) {
+  try {
+    const provider = req.query.ai_provider;
+    let elements: string[] = [];
+    const renderObj = {
+      elements,
+      label: "AI Model",
+      id: "model-selector",
+      name: "ai_model",
+      class: "flex flex-col justify-center",
+      layout: false,
+    };
+    if (!provider) {
+      for (const p of ai_providers) {
+        for (const m of Object.values(MODEL_IDS[p as keyof typeof MODEL_IDS])) {
+          elements.push(m);
+        }
+      }
+      renderObj.elements = elements;
+      return res.status(200).render("partials/select", renderObj);
+    }
+    elements = Object.values(MODEL_IDS[provider as keyof typeof MODEL_IDS]);
+    console.log("got elements", elements);
+    renderObj.elements = elements;
+    console.log("final renderObj", renderObj);
+    return res.status(200).render("partials/select", renderObj);
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function getBot(bot_id: string) {
   const [bot] = await db`SELECT * FROM bots where bot_id = ${bot_id}`;
 
@@ -178,7 +222,13 @@ export async function handleUpdateBot(
   try {
     const { id } = req.params;
 
-    const allowed_updates = ["name", "description", "url"];
+    const allowed_updates = [
+      "name",
+      "description",
+      "ai_provider",
+      "ai_model",
+      "api_key",
+    ];
 
     const requested_updates = Object.keys(req.body);
 
@@ -216,7 +266,7 @@ export async function handleUpdateBot(
   }
 }
 
-export async function renderEditBots(
+export async function renderEditBot(
   req: express.Request,
   res: express.Response,
   next: express.NextFunction,
@@ -224,11 +274,16 @@ export async function renderEditBots(
   try {
     const data = {} as RenderData;
     const bot = (await getBot(req.params.id)) as Bot;
+
     if (!bot) {
       return res.render("404", { title: "404" });
     }
 
     data.bot = bot;
+
+    const ai_models = Object.values(
+      MODEL_IDS[bot.ai_provider as keyof typeof MODEL_IDS],
+    );
 
     return res.render("bot/edit-bot", {
       title: "Edit",
@@ -236,6 +291,8 @@ export async function renderEditBots(
       type: "Edit",
       method: "put",
       url: `/api/v1/bots/${req.params.id}`,
+      ai_providers,
+      ai_models,
     });
   } catch (err) {
     next(err);
@@ -275,17 +332,20 @@ export async function handleDeleteBot(
 async function createNewChat(
   botId: string,
   botName: string,
+  provider: string,
+  modelId: string,
+  apiKey: string,
   knowledge?: string,
 ): Promise<string> {
   const chatId = crypto.randomUUID();
 
   prepareChatAgent({
-    provider: "GOOGLE",
+    provider,
     modelName: botName,
     botId,
     chatId,
-    apiKey: config.gemini.api_key,
-    modelId: "gemini-1.5-flash",
+    apiKey,
+    modelId,
     knowledge,
     config: { maxSteps: 5 },
   });
@@ -325,21 +385,13 @@ export async function handleCreateChatSession(
       return respError(404, "bot with this id does not exist!", res);
     }
 
-    //TODO: check if this is required.
-    // if (botHooks.length <= 0) {
-    //   return respError(
-    //     400,
-    //     "Bot has not been configured yet. Hook configuration is requried",
-    //     res,
-    //   );
-    // }
-
-    const [bot] =
-      (await db`SELECT knowledge from bots where bot_id = ${bot_id}`) as Bot[];
     const newChatId = await createNewChat(
       exBot.bot_id,
       exBot.name,
-      bot.knowledge,
+      exBot.ai_provider,
+      exBot.ai_model,
+      exBot.api_key,
+      exBot.knowledge,
     );
 
     const accessToken = util.generate_jwt({

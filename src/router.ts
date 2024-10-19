@@ -12,6 +12,7 @@ const bot_router = express.Router();
 bot_router.post("/bots", validator.validateBot, bot_controller.handleCreateBot);
 bot_router.get("/bots/:id", bot_controller.handleGetBot);
 bot_router.get("/bots", bot_controller.handleGetBot); //get all bots
+
 bot_router.put(
   "/bots/:id",
 
@@ -92,13 +93,15 @@ views_router.get(
 );
 
 views_router.get("/bots", bot_controller.renderBots);
+views_router.get("/bots/models", bot_controller.renderAIModels); //render ai models
+
 views_router.get(
   "/bots/new",
 
   bot_controller.renderCreateBot,
 );
 
-views_router.get("/bots/:id", bot_controller.renderEditBots);
+views_router.get("/bots/:id", bot_controller.renderEditBot);
 
 views_router.get(
   "/bots/:id/knowledge",
