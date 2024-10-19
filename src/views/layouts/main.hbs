@@ -26,7 +26,7 @@
           <script defer src="/js/alpine.min.js"></script>
           <script defer src="/js/fontawesome.js" crossorigin="anonymous"></script>
         </head>
-        <body class="h-full bg-[#0F0F10]">
+        <body class="h-full bg-[#0F0F10]" hx-boost="true">
           {{#if (notEq "noMenu") }}
           {{> menu}}
           {{/if}}

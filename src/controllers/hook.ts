@@ -68,6 +68,7 @@ export async function renderCreateHook(
       edit: false,
       url: `/api/v1/bots/${req.params.bot_id}/hooks/`,
       method: "post",
+      reqMethods,
     });
   } catch (err) {
     return res.render("404", {
@@ -124,6 +125,7 @@ export async function renderEditHook(
       hook,
       url: `/api/v1/bots/${req.params.bot_id}/hooks/${req.params.hook_id}`,
       method: "put",
+      reqMethods,
     });
   } catch (err) {}
 }

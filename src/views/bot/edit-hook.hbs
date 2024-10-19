@@ -5,7 +5,8 @@
       <div class="flex flex-col mb-6 space-y-2 text-white">
         <h1 class="text-3xl font-semibold tracking-tight">Hook</h1>
         <hr class="font-bold border border-gray-200">
-        <p class="text-sm"><span class="text-yellow-500 font-bold">Note:</span> Provide the appropriate and relevant hook details for effective model
+        <p class="text-sm"><span class="text-yellow-500 font-bold">Note:</span> Provide the appropriate and relevant
+          hook details for effective model
           training. </p>
       </div>
       <form onsubmit="event.preventDefault();" class="space-y-2" id="hook_edit_form">
@@ -15,7 +16,8 @@
             {{> input name="signal" label="Signal (when to trigger)" type="text" value=hook.signal}}
           </div>
           <div class="input-container w-full flex gap-2 items-center">
-            {{#if hook.api_calling}} {{> switch id="api_calling" on="true" text="Api calling" onClick="validate_api_calling" }}
+            {{#if hook.api_calling}} {{> switch id="api_calling" on="true" text="Api calling"
+            onClick="validate_api_calling" }}
             {{else }} {{> switch id="api_calling" on="false" text="Api calling" onClick="validate_api_calling"}} {{/if}}
           </div>
           <div class="api_container {{#if hook.api_calling}} {{else}} hidden {{/if}}">
@@ -26,9 +28,8 @@
                 <div class="p-2 w-full h-full mx-auto flex-col gap-4">
                   <p class="text-xs text-red-500 json-error hidden">Invalid JSON data</p>
                   <textarea type="text" id="hook_payload" oninput="validateJSON(event);"
-									style="background: rgb(13, 17, 23);"
-									placeholder="Enter Payload data here." name="payload"
-									class="flex w-full mt-2 min-h-[200px] px-3 py-2 text-sm bg-black border rounded-md text-white border-neutral-300 placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50">{{hook.payload}}</textarea>
+                    style="background: rgb(13, 17, 23);" placeholder="Enter Payload data here." name="payload"
+                    class="flex w-full mt-2 min-h-[200px] px-3 py-2 text-sm bg-black border rounded-md text-white border-neutral-300 placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50">{{hook.payload}}</textarea>
                 </div>
               </div>
               <div class="input-container w-full">
@@ -36,32 +37,24 @@
                 <div class="p-2 w-full h-full mx-auto flex-col items-center gap-4">
                   <p class="text-xs text-red-500 json-error hidden">Invalid JSON data</p>
                   <textarea type="text" id="hook_{{btn_name}}" form="hook_edit_form" oninput="validateJSON(event);"
-									style="background: rgb(13, 17, 23);"
-									name="headers" placeholder="Enter Headers data here."
-									class="flex w-full min-h-[200px] px-3 py-2 mt-2 text-sm text-white border rounded-md border-neutral-300 placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50">{{hook.headers}}</textarea>
+                    style="background: rgb(13, 17, 23);" name="headers" placeholder="Enter Headers data here."
+                    class="flex w-full min-h-[200px] px-3 py-2 mt-2 text-sm text-white border rounded-md border-neutral-300 placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50">{{hook.headers}}</textarea>
                 </div>
               </div>
             </div>
             <div class="bottom-form flex flex-col gap-2">
-              <div class="input-container w-full">
-                <label class="text-sm text-white" for="hook_method">Request Method</label>
-                <select id="hook_method" name="method"
-							class="flex h-10 px-3 py-2 text-sm bg-white border rounded-md border-neutral-300 ring-offset-background focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50">
-                  {{#if hook.method}}
-                  {{else}}
-                  <option selected disabled hidden value="">choose your option</option>
-                  {{/if}}
-                  <option {{#if (eq hook.method "GET" )}} selected {{/if}} value="GET">GET</option>
-                  <option {{#if (eq hook.method "POST" )}} selected {{/if}} value="POST">POST</option>
-                  <option {{#if (eq hook.method "PUT" )}} selected {{/if}} value="PUT">PUT</option>
-                  <option {{#if (eq hook.method "PATCH" )}} selected {{/if}} value="PATCH">PATCH</option>
-                  <option {{#if (eq hook.method "DELETE" )}} selected {{/if}} value="DELETE">DELETE</option>
-                </select>
-              </div>
+              {{> select label="Request Method" elem=hook.method elements=reqMethods name="method" id="hook_method"}}
             </div>
           </div>
           <div class="no_api_container {{#if hook.api_calling}} hidden {{/if}}">
-            {{> input name="response" label="Direct Response" type="text" value=hook.response}}
+            <div class="input-container w-full">
+              <label class="text-sm text-white" for="headers">Direct Response</label>
+              <div class="p-2 w-full h-full mx-auto flex-col items-center gap-4">
+                <textarea type="text" id="hook_response" form="hook_edit_form"
+                    style="background: rgb(13, 17, 23);" name="response" placeholder="Enter direct response here."
+                    class="flex w-full min-h-[200px] px-3 py-2 mt-2 text-sm text-white border rounded-md border-neutral-300 placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50">{{hook.response}}</textarea>
+              </div>
+            </div>
             {{#if hook.rephrase}} {{> switch id="rephrase" on="true" text="Rephrase response" warning="(AI)"}}
             {{else }} {{> switch id="rephrase" on="" text="Rephrase response" warning=" (AI)"}}
             {{/if}}
@@ -69,7 +62,10 @@
         </div>
         <hr class="font-bold border border-gray-200">
         <div class="input-container w-full flex justify-end">
-          {{> button method=method url=url class="inline-flex items-center justify-center w-40 h-10 px-4 py-2 text-sm font-medium tracking-wide text-black transition-colors duration-200 rounded-md bg-white hover:bg-gray-200 focus:ring-2 focus:ring-offset-2 focus:ring-neutral-900 focus:shadow-outline focus:outline-none" text="Save Hook"}}
+          {{> button method=method url=url class="inline-flex items-center justify-center w-40 h-10 px-4 py-2 text-sm
+          font-medium tracking-wide text-black transition-colors duration-200 rounded-md bg-white hover:bg-gray-200
+          focus:ring-2 focus:ring-offset-2 focus:ring-neutral-900 focus:shadow-outline focus:outline-none" text="Save
+          Hook"}}
         </div>
       </form>
     </div>
@@ -92,19 +88,20 @@
     }
   }
 
-  	function validate_api_calling(){
-  		const element = document.getElementById('api_calling');
-  			const rephrase = document.getElementById('rephrase');
-  		const api_container = document.querySelector(".api_container");
-  		const no_api_container = document.querySelector(".no_api_container");
+  function validate_api_calling() {
+    const element = document.getElementById('api_calling');
+    const rephrase = document.getElementById('rephrase');
+    const api_container = document.querySelector(".api_container");
+    const no_api_container = document.querySelector(".no_api_container");
 
-  		if(!element.checked){
-   				api_container.style.display = 'block';
-  				no_api_container.style.display = 'none';
-  					rephrase.checked = false;
-  			}else{
-  				api_container.style.display = 'none';
-  				no_api_container.style.display = 'block';
-  		};
-  	}
+    if (!element.checked) {
+      api_container.style.display = 'block';
+      no_api_container.style.display = 'none';
+      rephrase.checked = false;
+    } else {
+      api_container.style.display = 'none';
+      no_api_container.style.display = 'block';
+    };
+  }
 </script>
+

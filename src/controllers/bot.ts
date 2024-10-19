@@ -1,7 +1,6 @@
 import express from "express";
 import crypto from "node:crypto";
 import { db } from "../db/connection.js";
-import { Hook } from "../types/hook.js";
 import { RenderData } from "../types/bot.js";
 import { respError, renderStatus } from "../util.js";
 import redis from "../db/redis.js";
@@ -22,12 +21,6 @@ type Bot = {
   api_key: string;
 };
 
-type ChatSessionTokenData = {
-  chatId: string;
-  botId: string;
-  createdOn: number;
-};
-
 const MAX_FILE_SIZE = 20 * (1000 * 1000);
 const LOCALHOST = `http://localhost:${config.server.port}`;
 const REMOTEHOST = `https://amplizard.com`;
@@ -41,12 +34,20 @@ const ImageMimeTypes = [
   "image/heif",
 ];
 
-/*async function getHooks(bot_id: string): Promise<Hook[]> {
-  const hooks =
-    (await db`SELECT * FROM hooks where bot_id = ${bot_id}`) as Hook[];
+function validateProvider(provider: string) {
+  if (MODEL_IDS[provider as keyof typeof MODEL_IDS]) {
+    return true;
+  }
+  return false;
+}
 
-  return hooks;
-}*/
+function validateModel(provider: string, model: string) {
+  const models = Object.values(MODEL_IDS[provider as keyof typeof MODEL_IDS]);
+  if (models[model as keyof typeof models]) {
+    return true;
+  }
+  return false;
+}
 
 async function deleteBotCache(botId: string): Promise<void> {
   await redis.del(botId);
@@ -61,6 +62,15 @@ export async function handleCreateBot(
     const bot_id = crypto.randomUUID();
 
     const { name, description, ai_provider, ai_model, api_key } = req.body;
+
+    const models = MODEL_IDS[ai_provider as keyof typeof MODEL_IDS];
+
+    if (!models[ai_model as keyof typeof models]) {
+      return res.status(404).json({
+        status: "error",
+        description: "Model or provider does not exist!",
+      });
+    }
 
     const bot = {
       bot_id,
@@ -256,6 +266,28 @@ export async function handleUpdateBot(
 
     const bot = existing_values[0] as Bot;
 
+    if (req.body.ai_provider) {
+      const providerVal = validateProvider(req.body.ai_provider);
+
+      if (!providerVal) {
+        return res.status(404).json({
+          status: "error",
+          description: `${req.body.ai_provider} is not a supported AI provider!`,
+        });
+      }
+    }
+
+    if (req.body.ai_model) {
+      const modelVal = validateModel(req.body.ai_provider, req.body.ai_model);
+
+      if (!modelVal) {
+        return res.status(404).json({
+          status: "error",
+          description: `${req.body.ai_model} is not a supported AI model!`,
+        });
+      }
+    }
+
     await db`UPDATE bots SET ${db(req.body)} where bot_id = ${bot.bot_id}`;
 
     renderStatus(200, "bot updated successfully!", res);
@@ -394,16 +426,9 @@ export async function handleCreateChatSession(
       exBot.knowledge,
     );
 
-    const accessToken = util.generate_jwt({
-      chatId: newChatId,
-      botId: bot_id,
-      createdOn: Date.now(),
-    } as ChatSessionTokenData);
-
     res.status(201).json({
       status: "success",
       description: "New chat session created",
-      token: accessToken,
       chatId: newChatId,
     });
   } catch (err) {
@@ -429,24 +454,6 @@ export async function handleChat(
 
     if (!model) {
       return respError(404, "chat history does not exist!", res);
-    }
-
-    // if customer sent an image.
-    if (req.file) {
-      if (req.file.size > MAX_FILE_SIZE) {
-        return respError(400, "File size should be less than 20MB", res);
-      }
-
-      if (!ImageMimeTypes.includes(req.file.mimetype))
-        return respError(400, "File should be an image.!", res);
-
-      const customerImage = req.file.buffer.toString("base64");
-
-      console.log("customer sent an image!!");
-
-      await redis.set("customerImage:" + chat_id, customerImage);
-
-      prompt = "Sent you the image";
     }
 
     const message = await model.sendMessage(prompt);
@@ -480,6 +487,7 @@ export async function handleChat(
         closed: false,
       });
     }
+
     return res.status(200).json({
       status: "success",
       message,

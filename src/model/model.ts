@@ -4,80 +4,6 @@ import { CoreMessage, CoreTool, LanguageModelV1, generateText, tool } from "ai";
 import { initGenAI } from "./api.js";
 import { ModelInitConfig, ModelConfig } from "./types.js";
 
-/*const sendImageForAnalysisFunctionDeclaration = {
-  description: "Send image for analysis.",
-  parameters: z.object({
-    promptForAi: z
-      .string()
-      .describe(
-        `Prompt for an AI to analyze an image, ensuring clarity in the verification process while adhering to security and ethical guidelines. For example: "Please compare these two images and identify any signs of damage.`,
-      ),
-    imageUrl: z
-      .string()
-      .describe("url of the order image to compare the customer image with."),
-  }),
-  execute: async ({
-    promptForAi,
-    imageUrl,
-    customerImage,
-  }: {
-    promptForAi: string;
-    imageUrl: string;
-    customerImage: string;
-  }) => {
-    console.log("sending image for analysis");
-    return await sendImageForAnalysis(promptForAi, imageUrl, customerImage);
-  },
-};
-
-async function getImageFromUrl(url: string) {
-  const resp = await fetch(url, { mode: "no-cors" });
-
-  const blob = await resp.blob();
-
-  const base64Data = await util.blobToBase64(blob);
-
-  return base64Data;
-}
-
-async function analyzeAndCompareImages(
-  prompt: string,
-  compareWithImageUrl: string,
-  customerImage: string,
-) {
-  try {
-    const base64Data = await getImageFromUrl(compareWithImageUrl);
-    const compareWithImage = util.imageToGenerativePart(base64Data);
-
-    const customerImagePart = util.imageToGenerativePart(customerImage);
-
-    // const analysis = await callVisionModel(
-    //   prompt,
-    //   [compareWithImage, customerImagePart],
-    //   {},
-    // );
-
-    // return analysis;
-  } catch (err) {
-    console.error("ANALYSIS ERROR:", err);
-    return { status: "error", description: "internal analysis system error!" };
-  }
-}
-
-async function sendImageForAnalysis(
-  promptForAi: string,
-  imageUrl: string,
-  customerImage: string,
-) {
-  const resp = await analyzeAndCompareImages(
-    promptForAi,
-    imageUrl,
-    customerImage,
-  );
-
-  return resp;
-}*/
-
 /*function closeChat(chatId: string, closeMessage: string) {
   // Model.closeChat(chatId, closeMessage);
   console.log("chat closed by function");
@@ -90,7 +16,7 @@ export class Model {
   public modelName?: string;
   private model: LanguageModelV1;
   private history?: CoreMessage[];
-  public knowledge?: string;
+  public knowledge?: CoreMessage;
   public systemInstruction: CoreMessage;
   // private fetchHooksFunctionDeclaration: CoreTool;
   private tools: Record<string, CoreTool<any, any>>;
@@ -106,6 +32,7 @@ export class Model {
       modelId,
       instruction,
       config,
+      knowledge,
     }: ModelInitConfig,
     history: CoreMessage[],
   ) {
@@ -119,11 +46,15 @@ export class Model {
     this.botId = botId;
     this.modelName = modelName;
     this.systemInstruction = { role: "system", content: instruction as string };
+    this.knowledge = {
+      role: "system",
+      content: "Knowledge base: " + knowledge,
+    };
     this.tools = {};
     this.modelConfig = { ...config };
 
     const model = initGenAI({ model: modelId, provider }, apiKey);
-    this.history = [this.systemInstruction, ...history];
+    this.history = [this.systemInstruction, this.knowledge, ...history];
     this.model = model;
   }
 

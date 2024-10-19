@@ -83,9 +83,9 @@ export enum CohereChatModelId {
 export const MODEL_IDS = {
   OPEN_AI: OpenAIChatModelId,
   GOOGLE: GoogleGenerativeAIModelId,
-  GOOGLE_VERTEX: GoogleVertexModelId,
-  ANTHROPIC: AnthropicMessagesModelId,
-  BEDROCK: BedrockChatModelId,
-  MISTRAL: MistralChatModelId,
-  COHERE: CohereChatModelId,
+  //GOOGLE_VERTEX: GoogleVertexModelId,
+  //ANTHROPIC: AnthropicMessagesModelId,
+  //BEDROCK: BedrockChatModelId,
+  //MISTRAL: MistralChatModelId,
+  //COHERE: CohereChatModelId,
 };

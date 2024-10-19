@@ -1,7 +1,4 @@
 import crypto from "node:crypto";
-import config from "./config.js";
-import jwt from "jsonwebtoken";
-import { TokenData, RedactedUser } from "./types/auth.js";
 import redis from "./db/redis.js";
 import express from "express";
 import nodeUtil from "node:util";
@@ -18,31 +15,6 @@ export function hash_it(plaintext: string) {
 
 export function compare_hash(hash: string, plaintext: string) {
   return hash_it(plaintext) === hash;
-}
-
-export function generate_jwt(
-  auth_token_data: TokenData,
-  type: number = 1,
-  expiresIn: number | undefined = undefined,
-) {
-  const secret =
-    type === 2
-      ? config.jwt.refresh_token_secret
-      : config.jwt.access_token_secret;
-  const options = { algorithm: "HS256" } as jwt.SignOptions;
-
-  if (expiresIn) options.expiresIn = expiresIn;
-
-  const token = jwt.sign(auth_token_data, secret, options);
-  return token;
-}
-
-export async function saveSession(user: RedactedUser, exp: number) {
-  const sessionId = crypto.randomBytes(32).toString("hex");
-  await redis.hset(sessionId, user as any);
-  await redis.lpush("activeSession:" + user.user_id, sessionId);
-  await redis.expire(sessionId, exp);
-  return sessionId;
 }
 
 export async function deleteSession(sessionId: string) {
@@ -66,20 +38,6 @@ export function respError(
   adProp: undefined | object = undefined, //additional prop
 ) {
   return res.status(statusCode).json({ status: "error", error, ...adProp });
-}
-
-export function validateToken(token: string, type: number = 1) {
-  try {
-    const secret =
-      type === 2
-        ? config.jwt.refresh_token_secret
-        : config.jwt.access_token_secret;
-
-    const result = jwt.verify(token, secret);
-    return result;
-  } catch (ex) {
-    return null;
-  }
 }
 
 export function generateRandomString(length: number) {
