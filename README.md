@@ -96,7 +96,7 @@ npm run dev
 
 If you're interested in contributing to the Amplizard project:
 
-- Start by reading the [Contributing guide](https://github.com/bandaysajid/amplizard/blob/HEAD/contributing.md).
+- Start by reading the [Contributing guide](https://github.com/bandaysajid/amplizard/blob/HEAD/CONTRIBUTING.md).
 - Learn how to set up your local environment.
 
 ## LICENSE
