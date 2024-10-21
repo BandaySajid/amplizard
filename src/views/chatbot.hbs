@@ -26,16 +26,16 @@
 									class="mb-2 max-h-[400px] w-full overflow-auto rounded-md border border-[#e5e7eb] px-3 py-2 text-sm placeholder-[#6b7280] focus:outline-none focus:ring-2 focus:ring-[#9ca3af] disabled:cursor-not-allowed disabled:opacity-50 text-[#030712] focus-visible:ring-offset-2 overflow-hidden"
 									rows="1"
 										name="prompt" placeholder="Type your message"></textarea>
-        <div id="image-upload" class="image-upload ">
-          <label for="file-input">
-            <i class="fa-regular fa-image cursor pointer text-2xl px-1 py-2 cursor-pointer choose-image-icon"></i>
-          </label>
-          <input 
-    id="file-input" 
-    type="file" 
-    name="image" 
-          />
-        </div>
+        <!--     <div id="image-upload" class="image-upload "> -->
+        <!--       <label for="file-input"> -->
+        <!--         <i class="fa-regular fa-image cursor pointer text-2xl px-1 py-2 cursor-pointer choose-image-icon"></i> -->
+        <!--       </label> -->
+        <!--       <input  -->
+        <!-- id="file-input"  -->
+        <!-- type="file"  -->
+        <!-- name="image"  -->
+        <!--       /> -->
+        <!--     </div> -->
         <button id="send_btn"
 								hx-on:htmx:response-error="dispatchEvent(new CustomEvent('toast', {detail: {message: JSON.parse(event.detail.xhr.responseText).error, type: 'danger'}}))"
 								hx-on:click='const msgElem = document.getElementById("chat-input"); const msg=msgElem.value; if(msgElem.value.trim().length > 0) document.getElementById("chat-container").innerHTML+=`{{> Message message="${msg}" sender="You"}}`; msgElem.value = "";'

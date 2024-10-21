@@ -64,7 +64,7 @@ export async function renderCreateHook(
     }
 
     return res.render("bot/edit-hook", {
-      title: "New Intent",
+      title: "New Hook",
       edit: false,
       url: `/api/v1/bots/${req.params.bot_id}/hooks/`,
       method: "post",

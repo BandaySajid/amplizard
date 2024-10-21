@@ -167,10 +167,7 @@ for (const form of formElements) {
       }
     }
 
-    console.log("values gathered", values);
-
     const isNotChanged = Object.values(values).every((val) => {
-      console.log("valu:", val);
       return val === "f";
     });
 

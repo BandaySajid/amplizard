@@ -4,10 +4,10 @@
 							class="flex bg-neutral-700 h-10 px-3 text-white py-2 text-sm border rounded-md border-neutral-300 focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50">
     {{#if elem}}
     {{else}}
-    <option selected disabled hidden value="">choose your option</option>
+    <option selected disabled hidden value="" class="cursor-pointer">choose your option</option>
     {{/if}}  
     {{#each elements}}
-    <option value="{{this}}" {{#if (eq ../elem this)}} selected {{/if}}>{{ this }}</option>
+    <option class="cursor-pointer" value="{{this}}" {{#if (eq ../elem this)}} selected {{/if}}>{{ this }}</option>
     {{/each}}
   </select>
 </div>
