@@ -93,7 +93,7 @@ npm run dev
   docker compose up
   ```
 
-### Hooks
+## Hooks
 
 - You can use our ecom test api to test the hook functionality.
 
