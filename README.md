@@ -7,6 +7,7 @@ Amplizard is a customer service chatbot service designed to solve complex querie
 - [Features](#features)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
+- [Testing Hooks](#hooks)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -91,6 +92,12 @@ npm run dev
   ```bash
   docker compose up
   ```
+
+### Hooks
+
+- You can use our ecom test api to test the hook functionality.
+
+- Get the api from [here](https://github.com/bandaysajid/amplizard-test-ecom-api), make sure to read the docs
 
 ## Contributing
 
