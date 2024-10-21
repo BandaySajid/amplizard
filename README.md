@@ -97,7 +97,7 @@ npm run dev
 
 - You can use our ecom test api to test the hook functionality.
 
-- Get the api from [here](https://github.com/bandaysajid/amplizard-test-ecom-api), make sure to read the docs
+- Obtain the api from [here](https://github.com/bandaysajid/amplizard-test-ecom-api) and be sure to read the documentation.
 
 ## Contributing
 
