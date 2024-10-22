@@ -1,0 +1,108 @@
+<section class="sm:ml-64 px-8 py-4 min-h-full">
+  <div class="relative w-full mx-auto lg:mb-0 mt-4 flex items-center justify-center">
+    <div class="relative w-full md:mx-16 p-2 rounded-lg ">
+      {{> Back}}
+      <div class="flex flex-col mb-6 space-y-2 text-white">
+        <h1 class="text-3xl font-semibold tracking-tight">Hook</h1>
+        <hr class="font-bold border border-gray-200">
+        <p class="text-sm"><span class="text-yellow-500 font-bold">Note:</span> Provide the appropriate and relevant
+          hook details for effective model
+          training. </p>
+      </div>
+      <form onsubmit="event.preventDefault();" class="space-y-2" id="hook_edit_form">
+        <div class="top-form flex-col flex p-1 gap-4">
+          <div class="left grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {{> input name="name" label="Name" type="text" value=hook.name}}
+            {{> input name="signal" label="Signal (when to trigger)" type="text" value=hook.signal}}
+          </div>
+          <div class="input-container w-full flex gap-2 items-center">
+            {{#if hook.api_calling}} {{> switch id="api_calling" on="true" text="Api calling"
+            onClick="validate_api_calling" }}
+            {{else }} {{> switch id="api_calling" on="false" text="Api calling" onClick="validate_api_calling"}} {{/if}}
+          </div>
+          <div class="api_container {{#if hook.api_calling}} {{else}} hidden {{/if}}">
+            {{> input name="url" label="Url" type="text" value=hook.url}}
+            <div class="right grid grid-cols-1 sm:grid-cols-2 gap-2 p-1 text-center">
+              <div class="input-container w-full">
+                <label class="text-sm text-white" for="payload">Payload / Body</label>
+                <p class="text-white text-xs text-blue-300">Ex: {"userId": 1}</p>
+                <div class="p-2 w-full h-full mx-auto flex-col gap-4">
+                  <p class="text-xs text-red-500 json-error hidden">Invalid JSON data</p>
+                  <textarea type="text" id="hook_payload" oninput="validateJSON(event);"
+                    style="background: rgb(13, 17, 23);" placeholder="Enter Payload data here." name="payload"Jjk
+																																																class="flex w-full mt-2 min-h-[200px] px-3 py-2 text-sm bg-black border rounded-md text-white border-neutral-300 placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50"> {{#if hook.payload}} {{hook.payload}} {{else}}{}{{/if}}</textarea>
+                </div>
+              </div>
+              <div class="input-container w-full">
+                <label class="text-sm text-white" for="headers">Headers</label>
+                <p class="text-white text-xs text-blue-300">Ex: {"Content-Type": "application/json"}</p>
+                <div class="p-2 w-full h-full mx-auto flex-col items-center gap-4">
+                  <p class="text-xs text-red-500 json-error hidden">Invalid JSON data</p>
+                  <textarea type="text" id="hook_{{btn_name}}" form="hook_edit_form" oninput="validateJSON(event);"
+                    style="background: rgb(13, 17, 23);" name="headers" placeholder="Enter Headers data here." class="flex w-full min-h-[200px] px-3 py-2 mt-2 text-sm text-white border rounded-md border-neutral-300 placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50">{{#if hook.headers}} {{hook.headers}} {{else}}{}{{/if}}</textarea>
+                </div>
+              </div>
+            </div>
+            <div class="bottom-form flex flex-col gap-2">
+              {{> select label="Request Method" elem=hook.method elements=reqMethods name="method" id="hook_method"}}
+            </div>
+          </div>
+          <div class="no_api_container {{#if hook.api_calling}} hidden {{/if}}">
+            <div class="input-container w-full">
+              <label class="text-sm text-white" for="headers">Direct Response</label>
+              <div class="p-2 w-full h-full mx-auto flex-col items-center gap-4">
+                <textarea type="text" id="hook_response" form="hook_edit_form"
+                    style="background: rgb(13, 17, 23);" name="response" placeholder="Enter direct response here."
+                    class="flex w-full min-h-[200px] px-3 py-2 mt-2 text-sm text-white border rounded-md border-neutral-300 placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50">{{hook.response}}</textarea>
+              </div>
+            </div>
+            {{#if hook.rephrase}} {{> switch id="rephrase" on="true" text="Rephrase response" warning="(AI)"}}
+            {{else }} {{> switch id="rephrase" on="" text="Rephrase response" warning=" (AI)"}}
+            {{/if}}
+          </div>
+        </div>
+        <hr class="font-bold border border-gray-200">
+        <div class="input-container w-full flex justify-end">
+          {{> button method=method url=url class="inline-flex items-center justify-center w-40 h-10 px-4 py-2 text-sm
+          font-medium tracking-wide text-black transition-colors duration-200 rounded-md bg-white hover:bg-gray-200
+          focus:ring-2 focus:ring-offset-2 focus:ring-neutral-900 focus:shadow-outline focus:outline-none" text="Save
+          Hook"}}
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+<script>
+  function validateJSON(e) {
+    const target = e.target;
+    try {
+      const data = target?.value;
+      JSON.parse(data);
+      target.form?.classList.remove("disabled");
+
+      target.parentNode?.children[0].classList.add("hidden");
+      return true;
+    } catch (err) {
+      target.parentNode?.children[0].classList.remove("hidden");
+      target.form?.classList.add("disabled");
+      return false;
+    }
+  }
+
+  function validate_api_calling() {
+    const element = document.getElementById('api_calling');
+    const rephrase = document.getElementById('rephrase');
+    const api_container = document.querySelector(".api_container");
+    const no_api_container = document.querySelector(".no_api_container");
+
+    if (!element.checked) {
+      api_container.style.display = 'block';
+      no_api_container.style.display = 'none';
+      rephrase.checked = false;
+    } else {
+      api_container.style.display = 'none';
+      no_api_container.style.display = 'block';
+    };
+  }
+</script>
+

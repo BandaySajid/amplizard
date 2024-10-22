@@ -1,0 +1,35 @@
+<section class='sm:ml-64 px-2 sm:px-8 py-4 min-h-full'>
+  <div class="overflow-x-auto ">
+    <div class="inline-block min-w-full">
+      <div class="overflow-hidden">
+        <div class='p-4 '>
+          {{> Back}}
+          <div class="heading flex justify-between items-center  pb-2 my-4">
+            <h2 class='text-3xl font-semibold text-white'>Bots</h2>
+            <a href="/bots/new" type="button"
+				class="inline-block p-3 text-left text-sm font-medium border border-gray-700 text-white rounded bg-black hover:bg-neutral-900">
+              Create new Bot
+            </a>
+          </div>
+          <div class="bots-table ">
+            <div class="bots-table-heading text-white flex justify-between ">
+              <p class="px-5 py-3 text-xs  font-medium text-left uppercase">Name</p>
+              <p class="px-5 py-3 text-xs font-medium text-right uppercase">Action</p>
+            </div>
+            <hr class="mb-3">
+            <div class="bots-container flex w-full flex-col gap-2">
+              {{#each bots}}
+              <div class="text-white bg-[#18181B] rounded-lg border-none flex w-full justify-between">
+                <p class="px-5 py-4 text-sm font-medium whitespace-nowrap">{{this.name}}</td>
+                <div class="px-5 py-4 text-right whitespace-nowrap">
+                  <a class="text-black text-md bg-black rounded-md font-medium py-2 px-4 border border-gray-700 text-white hover:bg-neutral-900"
+										href="/bots/{{this.bot_id}}"><i class="fa-solid fa-gear text-white"></i></a>
+                </div>
+              </div>
+              {{/each}}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>

@@ -1,0 +1,14 @@
+<div class="button-container p-1 w-full">
+  <button type="submit" hx-{{method}}="{{url}}" class="flex items-center justify-center gap-2 {{class}}" hx-swap="afterend transition:true" hx-indicator"#indicator" hx-on:click="deleteButtonStatus(event)">
+    {{ text }}
+    {{> spinner id="indicator" }}
+  </button>
+  <p id="button_status"></p>
+</div>
+<script>
+  function deleteButtonStatus(e) {
+  	const button = e.target;
+
+  	button.nextSibling?.remove();
+  }
+</script>

@@ -1,0 +1,386 @@
+[
+  {
+    "role": "user",
+    "content": "Hi"
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": ""
+      },
+      {
+        "type": "tool-call",
+        "toolCallId": "0",
+        "toolName": "fetchHook",
+        "args": {
+          "intent": "Need user data"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "0",
+        "toolName": "fetchHook",
+        "result": {
+          "result": "{\"hook\":{\"name\":\"getCurrentUserData\",\"url\":\"http://192.168.1.6:7254/currentUser\",\"method\":\"GET\",\"payload\":{},\"headers\":{\"content-type\":\"application/json\"},\"signal\":\"When the current user data is needed / required\"}}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": ""
+      },
+      {
+        "type": "tool-call",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "args": {
+          "hookName": "getCurrentUserData",
+          "data": "{\"url\":\"http://192.168.1.6:7254/currentUser\",\"method\":\"GET\",\"payload\":{},\"headers\":{\"content-type\":\"application/json\"}}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "result": {
+          "result": "{\"id\":1,\"name\":\"David Manohan\",\"email\":\"david@example.com\",\"joined\":\"2022-10-14\",\"auth_token\":\"22221238921311892138\"}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Hello! How can I help you today?\n"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "content": "I want to cancel an order with id 101?"
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Why do you want to cancel that order?\n"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "content": "The price has changed."
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": ""
+      },
+      {
+        "type": "tool-call",
+        "toolCallId": "0",
+        "toolName": "fetchHook",
+        "args": {
+          "intent": "Need order data"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "0",
+        "toolName": "fetchHook",
+        "result": {
+          "result": "{\"hook\":{\"name\":\"getOrderData\",\"url\":\"http://192.168.1.6:7254/orders/{order_id}\",\"method\":\"POST\",\"payload\":{\"userId\":\"{userId}\"},\"headers\":{\"content-type\":\"application/json\"},\"signal\":\"When an individual order data is needed for a user.\"}}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool-call",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "args": {
+          "hookName": "getOrderData",
+          "data": "{\"url\":\"http://192.168.1.6:7254/orders/101\",\"method\":\"POST\",\"payload\":{\"userId\":1},\"headers\":{\"content-type\":\"application/json\"}}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "result": {
+          "result": "{\"id\":101,\"userId\":1,\"item\":\"Laptop\",\"amount\":1200,\"imageUrl\":\"https://images.pexels.com/photos/2280547/pexels-photo-2280547.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1\",\"date\":\"2024-08-16\"}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Alright I have verified that you have an order of Laptop with id 101 placed on 2024-08-16. Do you really wish to cancel it?\n"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "content": "Yes."
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": ""
+      },
+      {
+        "type": "tool-call",
+        "toolCallId": "0",
+        "toolName": "fetchHook",
+        "args": {
+          "intent": "Need to cancel an order"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "0",
+        "toolName": "fetchHook",
+        "result": {
+          "result": "{\"hook\":{\"name\":\"cancelOrderHook\",\"url\":\"http://192.168.1.6:7254/orders/{order_id}/cancel\",\"method\":\"POST\",\"payload\":{\"userId\":\"{userId}\"},\"headers\":{\"content-type\":\"application/json\"},\"signal\":\"When an individual order has to be cancelled for a user.\"}}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool-call",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "args": {
+          "hookName": "cancelOrderHook",
+          "data": "{\"url\":\"http://192.168.1.6:7254/orders/101/cancel\",\"method\":\"POST\",\"payload\":{\"userId\":1},\"headers\":{\"content-type\":\"application/json\"}}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "result": {
+          "result": "{\"status\":\"success\",\"description\":\"Order with id 101 has been cancelled.\"}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Your order with id 101 has been cancelled. Is there anything else I can help you with?\n"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "content": "No thanks."
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Have a nice day.\n"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "content": "Can you track my order with id 102?"
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": ""
+      },
+      {
+        "type": "tool-call",
+        "toolCallId": "0",
+        "toolName": "fetchHook",
+        "args": {
+          "intent": "Need current user data"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "0",
+        "toolName": "fetchHook",
+        "result": {
+          "result": "{\"hook\":{\"name\":\"getCurrentUserData\",\"url\":\"http://192.168.1.6:7254/currentUser\",\"method\":\"GET\",\"payload\":{},\"headers\":{\"content-type\":\"application/json\"},\"signal\":\"When the current user data is needed / required\"}}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": ""
+      },
+      {
+        "type": "tool-call",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "args": {
+          "hookName": "getCurrentUserData",
+          "data": "{\"url\":\"http://192.168.1.6:7254/currentUser\",\"method\":\"GET\",\"payload\":{},\"headers\":{\"content-type\":\"application/json\"}}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "result": {
+          "result": "{\"id\":1,\"name\":\"David Manohan\",\"email\":\"david@example.com\",\"joined\":\"2022-10-14\",\"auth_token\":\"22221238921311892138\"}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": ""
+      },
+      {
+        "type": "tool-call",
+        "toolCallId": "2",
+        "toolName": "fetchHook",
+        "args": {
+          "intent": "Need order data"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "2",
+        "toolName": "fetchHook",
+        "result": {
+          "result": "{\"hook\":{\"name\":\"getOrderData\",\"url\":\"http://192.168.1.6:7254/orders/{order_id}\",\"method\":\"POST\",\"payload\":{\"userId\":\"{userId}\"},\"headers\":{\"content-type\":\"application/json\"},\"signal\":\"When an individual order data is needed for a user.\"}}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool-call",
+        "toolCallId": "3",
+        "toolName": "triggerHook",
+        "args": {
+          "hookName": "getOrderData",
+          "data": "{\"url\":\"http://192.168.1.6:7254/orders/102\",\"method\":\"POST\",\"payload\":{\"userId\":1},\"headers\":{\"content-type\":\"application/json\"}}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "3",
+        "toolName": "triggerHook",
+        "result": {
+          "result": "{\"id\":102,\"userId\":1,\"item\":\"Tablet\",\"amount\":600,\"imageUrl\":\"https://images.pexels.com/photos/2280547/pexels-photo-2280547.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1\",\"date\":\"2024-08-18\",\"status\":\"shipped\"}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Your order with id 102 is shipped. Is there anything else I can assist you with?\n"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "content": "No, that will be all."
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Thank you! Have a great day!\n"
+      }
+    ]
+  }
+]

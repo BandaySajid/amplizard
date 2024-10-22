@@ -1,0 +1,70 @@
+services:
+  development_app:
+    #container_name: amplizard_dev_app
+    build: 
+      context: .
+      target: development
+    volumes:
+      - ./:/app
+      - /usr/src/app/node_modules
+    ports:
+      - 80:80
+      - 9090:9090
+      - 6969:6969
+      - 9091:9091
+    depends_on:
+      - redis
+      - postgres
+    env_file: ".env" #comment out this line if you want to provide env vars directly, and use the env vars given below.
+
+    environment:
+      - NODE_ENV=development
+
+    #environment:
+      #- host=0.0.0.0
+      #- port=9090
+      #- POSTGRES_HOST=postgres
+      #- POSTGRES_USER=postgres
+      #- POSTGRES_DB=amplizard
+      #- POSTGRES_PORT=5432
+      #- POSTGRES_PASSWORD=postgres
+      #- redis_url=redis://redis:6379
+      
+    networks:
+      - amplizard_net
+
+    restart: always
+
+    command: npm run dev 
+
+  redis:
+    container_name: redis
+    image: redis:alpine
+      #ports:
+      #- "6379:6379"
+    networks:
+      - amplizard_net
+
+  postgres:
+    container_name: amplizard_db
+    image: postgres:alpine
+    env_file: ".env" #comment out this line if you want to provide env vars directly, and use the env vars given below.
+    #environment:
+      #- POSTGRES_USER=postgres
+      #- POSTGRES_DB=amplizard
+      #- POSTGRES_PASSWORD=postgres
+
+    #ports: #commented out, since using docker network bridge
+      #- "5432:5432"
+
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - amplizard_net
+
+volumes:
+  postgres-data:
+
+networks:
+  amplizard_net:
+    driver: bridge

@@ -1,0 +1,41 @@
+<section class='sm:ml-64 px-8 py-4 min-h-full'>
+  <div class=' mx-auto w-full'>
+    <div class='overflow-hidden'>
+      <div class='p-4 '>
+        {{> Back}}
+        <div class="heading flex justify-between items-center border-b pb-2 my-4">
+          <h2 class='text-3xl font-semibold text-white'>Hooks</h2>
+          <a href="/bots/{{bot_id}}/hooks/new" type="button"
+				class="inline-block p-3 text-left text-sm font-medium border border-gray-700 text-white rounded bg-black hover:bg-neutral-900">
+            Create new hook
+          </a>
+        </div>
+        <div class="relative">
+          <div class="rounded-md">
+            <div class="grid gap-6 sm:grid-cols-1 lg:grid-cols-3">
+              {{#each hooks}}
+              <div id="hook-item-{{this.hook_id}}" class="flex flex-col justify-between rounded-lg border border-neutral-500 bg-card text-card-foreground shadow-sm text-white" data-v0-t="card">
+                <div class="flex flex-col space-y-1.5 p-6">
+                  <h3 class="text-xl font-semibold leading-none tracking-tight text-wrap break-words">{{this.name}}</h3>
+                </div>
+                <div class="px-6 h-auto ">
+                  <p class="text-muted-foreground">
+                    {{this.signal}} 
+                  </p>
+                </div>
+                <div class="items-center p-6 flex justify-end gap-2 relative">
+                  <a type="button" href="/bots/{{this.bot_id}}/hooks/{{this.hook_id}}" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3">
+                    Edit
+                  </a>
+                  {{> delete-modal hook=this target=(concat "#hook-item-" this.hook_id) method="delete" type="hook"
+                  url=(concat "/api/v1/bots/" this.bot_id "/hooks/" this.hook_id) }}
+                </div>
+              </div>
+              {{/each}}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
