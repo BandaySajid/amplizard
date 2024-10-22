@@ -7,7 +7,7 @@
     <option selected disabled hidden value="" class="cursor-pointer">choose your option</option>
     {{/if}}  
     {{#each elements}}
-    <option class="cursor-pointer" value="{{this}}" {{#if (eq ../elem this)}} selected {{/if}}>{{ this }}</option>
+    <option class="cursor-pointer" value="{{this}}" {{#if (eq ../elem this)}} selected {{/if}}>{{#if (eq this ../recommended)}} {{ this }} (recommened) {{else}} {{ this }} {{/if}}</option>
     {{/each}}
   </select>
 </div>

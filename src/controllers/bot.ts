@@ -21,18 +21,18 @@ type Bot = {
   api_key: string;
 };
 
-const MAX_FILE_SIZE = 20 * (1000 * 1000);
+// const MAX_FILE_SIZE = 20 * (1000 * 1000);
 const LOCALHOST = `http://localhost:${config.server.port}`;
 const REMOTEHOST = `https://amplizard.com`;
 //const CACHE_EXPIRE_TIME = 7200; //will be 2 hours
 
-const ImageMimeTypes = [
-  "image/png",
-  "image/jpeg",
-  "image/webp",
-  "image/heic",
-  "image/heif",
-];
+// const ImageMimeTypes = [
+//   "image/png",
+//   "image/jpeg",
+//   "image/webp",
+//   "image/heic",
+//   "image/heif",
+// ];
 
 function validateProvider(provider: string) {
   if (MODEL_IDS[provider as keyof typeof MODEL_IDS]) {

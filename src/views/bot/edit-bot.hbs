@@ -24,6 +24,7 @@
             method="get" 
             swap="outerHTML" 
             target="#model-selector-container"
+            recommended="GOOGLE"
             }}            
             {{> select label="AI Model" elem=data.bot.ai_model class="flex flex-col justify-center" name="ai_model" elements=ai_models id="model-selector"}}
             {{> input name="api_key" label="Model Api Key" type="password" value=data.bot.api_key required="required"}}
