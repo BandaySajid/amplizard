@@ -1,31 +1,24 @@
-FROM node:20 AS development
-
-ARG NODE_ENV=development
-ENV NODE_ENV=${NODE_ENV}
+# Stage 1: Build the application
+FROM node:latest AS builder
 
 WORKDIR /app
 
 COPY package*.json .
 
-RUN npm install
+RUN npx pnpm install
 
 COPY . .
 
 RUN npm run build
 
-FROM node:20 AS production
-
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}
+# Stage 2: Run the application
+FROM node:latest AS production
 
 WORKDIR /app
 
 COPY package*.json .
+RUN npx pnpm install --prod
 
-RUN npm install --only=production
+COPY --from=builder /app/dist ./dist
 
-COPY --from=development /app/dist ./dist
-
-CMD ["cp","dist/config.sample.js", "dist/config.js"]
-
-CMD ["node","/app/dist/main.js"]
+#CMD ["node", "/app/dist/main.js"]

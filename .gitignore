@@ -7,3 +7,5 @@ test_build
 docs/venv
 docs/site
 notes
+.pnpm-store/
+pnpm-lock.yaml
