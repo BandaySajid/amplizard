@@ -46,9 +46,9 @@ TODO:
     - [x] Add integration code on frontend for businesses.
     - [ ] Run promises that are not awaited / handled as background functions, to handle them correctly and log errors .
     - [ ] Test whole functionality.
-    - [ ] Users should be able to choose how to trigger hooks, like if they want to trigger the public api, or receiving event using websocket and writing custom code or triggering internal api using a tool on their backend.
+    - [ ] Businesses should be able to choose how to trigger hooks, like if they want to trigger the public api, or receiving event using websocket and writing custom code or triggering internal api using a tool on their backend.
     - [ ] Chatbot should figure out the recent behaviour of user and when he comes the next time, it should show up some buttons to do action. Like cancel_order or something.
-    - [ ] Support for all top LLMs / ais, like open ai, gemini, claude etc.
+    - [ ] Ratelimit system for each api / ai model to handle 1 request per second and 15 requests / min.
 
   - UPCOMING:
     - [ ] Optimise model system instruction.

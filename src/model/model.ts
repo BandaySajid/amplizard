@@ -2,46 +2,48 @@
 //import redis from "../db/redis.js";
 import { CoreMessage, CoreTool, LanguageModelV1, generateText, tool } from "ai";
 import { initGenAI } from "./api.js";
-import { ModelInitConfig, ModelConfig } from "./types.js";
+import { ModelInitConfig, ModelConfig, MODEL_TYPE } from "./types.js";
+import config from "../config.js";
 
-/*function closeChat(chatId: string, closeMessage: string) {
-  // Model.closeChat(chatId, closeMessage);
-  console.log("chat closed by function");
-  return { status: "success", description: "chat has been closed!" };
-}*/
+const MODELS = {
+  chat: initGenAI(config.gemini.chat_api_key),
+  hook: initGenAI(config.gemini.hook_api_key),
+};
+
+console.log(
+  `initialized ${MODELS.chat.length} chat models and ${MODELS.hook.length} hook models.`,
+);
+
+type ModelIndex = {
+  chat: number;
+  hook: number;
+};
 
 export class Model {
   public chatId?: string;
   public botId?: string;
   public modelName?: string;
-  private model: LanguageModelV1;
+  static model: LanguageModelV1;
   private history?: CoreMessage[];
   public knowledge?: CoreMessage;
   public systemInstruction: CoreMessage;
-  // private fetchHooksFunctionDeclaration: CoreTool;
   private tools: Record<string, CoreTool<any, any>>;
   private modelConfig: ModelConfig;
+  static indexes: ModelIndex = { chat: -1, hook: -1 };
+  private type: MODEL_TYPE;
 
   constructor(
     {
       modelName,
-      provider,
       botId,
       chatId,
-      apiKey,
-      modelId,
       instruction,
       config,
       knowledge,
+      type,
     }: ModelInitConfig,
     history: CoreMessage[],
   ) {
-    if (!modelId || !provider || !apiKey) {
-      throw new Error(" modelId, provider, and apiKey are required parameters");
-    }
-
-    console.log("model id is:", modelId);
-
     this.chatId = chatId;
     this.botId = botId;
     this.modelName = modelName;
@@ -52,18 +54,26 @@ export class Model {
     };
     this.tools = {};
     this.modelConfig = { ...config };
+    this.type = type;
 
-    const model = initGenAI({ model: modelId, provider }, apiKey);
     this.history = [this.systemInstruction, this.knowledge, ...history];
-    this.model = model;
   }
 
   async sendMessage(userPrompt: string, _: boolean = false): Promise<string> {
-    //streamed message functionality to be implemented.
+    //TODO: implement message streaming.
+
+    Model.balanceModels(this.type);
+
+    console.log("Total no. of models:", MODELS["chat"].length);
+    console.log(
+      `using model number for (${this.type}):`,
+      Model.indexes[this.type],
+    );
+
     this.history?.push({ role: "user", content: userPrompt });
 
     const result = await generateText({
-      model: this.model,
+      model: Model.model!,
       //temperature: 0,
       //prompt: prompt, // used without message history.
       tools: this.tools,
@@ -75,7 +85,19 @@ export class Model {
       this.history?.push(msg);
     }
 
+    console.log(`${this.type}-USAGE :`, result.usage);
+
     return result.text;
+  }
+
+  static balanceModels(type: MODEL_TYPE) {
+    Model.indexes[type] += 1;
+
+    if (Model.indexes[type] >= MODELS[type].length) {
+      Model.indexes[type] = 0;
+    }
+
+    Model.model = MODELS[type][Model.indexes[type]];
   }
 
   addTool(toolName: string, funcTool: CoreTool) {

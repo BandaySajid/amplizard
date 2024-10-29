@@ -2,9 +2,6 @@ CREATE TABLE IF NOT EXISTS bots (
 	bot_id VARCHAR(50) UNIQUE NOT NULL,
 	name VARCHAR(50) UNIQUE NOT NULL,
 	description VARCHAR(300),
-	ai_provider VARCHAR(50) NOT NULL,
-	ai_model VARCHAR(50) NOT NULL,
-	api_key VARCHAR(300) NOT NULL,
 	knowledge TEXT,
 	created_at timestamp DEFAULT NOW(),
 	PRIMARY KEY(bot_id)

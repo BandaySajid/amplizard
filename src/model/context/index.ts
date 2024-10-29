@@ -4,6 +4,7 @@ import path from "node:path";
 import config from "../../config.js";
 import queries from "./json/queries.json" assert { type: "json" };
 import inappropriate_queries from "./json/inappropriate_queries.json" assert { type: "json" };
+import fetch_hooks from "./json/fetch_hooks.json" assert { type: "json" };
 
 const __dirname = config.dirname(import.meta.url);
 
@@ -19,12 +20,14 @@ const hookInstruction = fs.readFileSync(
 
 const chat_context = [...queries, ...inappropriate_queries];
 
+const hook_context = fetch_hooks;
+
 export function getContext() {
   return {
     chatAgent: {
       instruction: chatInstruction,
       context: chat_context,
     },
-    hookAgent: { instruction: hookInstruction },
+    hookAgent: { instruction: hookInstruction, context: hook_context },
   };
 }

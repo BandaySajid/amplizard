@@ -7,6 +7,7 @@ export default {
   server: {
     host: process.env.host || "localhost",
     port: Number(process.env.port) || 9090,
+    remote_host: process.env.REMOTE_HOST | "",
   },
 
   websocket: {
@@ -25,6 +26,11 @@ export default {
   redis: {
     host: process.env.redis_host || "localhost",
     url: process.env.redis_url || "redis://localhost:6379",
+  },
+
+  gemini: {
+    chat_api_key: process.env.GEMINI_CHAT_API_KEY || "",
+    hook_api_key: process.env.GEMINI_HOOK_API_KEY || "",
   },
 
   dirname: (meta_url) => {

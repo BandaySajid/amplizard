@@ -1,6 +1,3 @@
-import { stat } from "node:fs";
-import { parse } from "node:path";
-
 type ChVals = {
   [key: string]: string;
 };
@@ -127,67 +124,70 @@ function enable(elem: string | HTMLButtonElement) {
 const formElements = document.querySelectorAll("form");
 const previousFormValues = new Map();
 
-for (const form of formElements) {
-  const submitBtn = form.querySelector(
-    `button[type="submit"]`,
-  ) as HTMLButtonElement;
-  if (submitBtn) submitBtn.disabled = true;
+window.addEventListener("DOMContentLoaded", () => {
+  for (const form of formElements) {
+    const submitBtn = form.querySelector(
+      `button[type="submit"]`,
+    ) as HTMLButtonElement;
+    if (submitBtn) submitBtn.disabled = true;
 
-  const previousValues = new Map();
-  let values = {} as ChVals;
+    const previousValues = new Map();
+    let values = {} as ChVals;
 
-  for (const elem of form.elements) {
-    const target = elem as HTMLInputElement;
-    if (
-      target.tagName === "INPUT" ||
-      target.tagName === "SELECT" ||
-      target.tagName === "TEXTAREA"
-    ) {
-      previousFormValues.set(target.id, target.value.trim() || "");
-      values[target.id] = "f";
-    }
-  }
-
-  form.addEventListener("input", function (event) {
-    const target = event.target as HTMLInputElement;
-    const tID = target.id as keyof typeof previousFormValues;
-    if (
-      target.tagName === "INPUT" ||
-      target.tagName === "SELECT" ||
-      target.tagName === "TEXTAREA"
-    ) {
-      const currentValue = target.value.trim();
-      const previousValue = previousFormValues.get(tID) || "";
-      previousValues.set(tID, currentValue);
-
-      if (currentValue !== previousValue) {
-        values[tID as keyof typeof values] = "t";
-      } else {
-        values[tID as keyof typeof values] = "f";
+    for (const elem of form.elements) {
+      const target = elem as HTMLInputElement;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "SELECT" ||
+        target.tagName === "TEXTAREA"
+      ) {
+        previousFormValues.set(target.id, target.value.trim() || "");
+        values[target.id] = "f";
       }
     }
 
-    const isNotChanged = Object.values(values).every((val) => {
-      return val === "f";
+    form.addEventListener("input", function (event) {
+      console.log("form input");
+      const target = event.target as HTMLInputElement;
+      const tID = target.id as keyof typeof previousFormValues;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "SELECT" ||
+        target.tagName === "TEXTAREA"
+      ) {
+        const currentValue = target.value.trim();
+        const previousValue = previousFormValues.get(tID) || "";
+        previousValues.set(tID, currentValue);
+
+        if (currentValue !== previousValue) {
+          values[tID as keyof typeof values] = "t";
+        } else {
+          values[tID as keyof typeof values] = "f";
+        }
+      }
+
+      const isNotChanged = Object.values(values).every((val) => {
+        return val === "f";
+      });
+
+      if (isNotChanged || form.classList.contains("disabled")) {
+        form.removeAttribute("cVal");
+        submitBtn.disabled = true;
+      } else {
+        submitBtn.disabled = false;
+        form.setAttribute("cVal", "true");
+      }
     });
 
-    if (isNotChanged || form.classList.contains("disabled")) {
-      form.removeAttribute("cVal");
+    submitBtn.addEventListener("click", function (_) {
+      previousFormValues.clear();
+      for (const key of previousValues.keys()) {
+        previousFormValues.set(key, previousValues.get(key));
+      }
       submitBtn.disabled = true;
-    } else {
-      submitBtn.disabled = false;
-      form.setAttribute("cVal", "true");
-    }
-  });
-
-  submitBtn.addEventListener("click", function (_) {
-    previousFormValues.clear();
-    for (const key of previousValues.keys()) {
-      previousFormValues.set(key, previousValues.get(key));
-    }
-    submitBtn.disabled = true;
-  });
-}
+    });
+  }
+});
 
 function showToast(message: string, type: string) {
   window.dispatchEvent(
@@ -199,70 +199,3 @@ function showToast(message: string, type: string) {
     }),
   );
 }
-
-function getResendTimer(id: string) {
-  let start = null;
-
-  if (id === "resendVerificationEmail") {
-    start = Number(localStorage.getItem("resendVerificationTimer"));
-  } else {
-    start = Number(localStorage.getItem("resendForgotTimer"));
-  }
-
-  if (start) {
-    const now = Date.now() - start;
-    return now / 1000;
-  }
-
-  return null;
-}
-
-function createResendInterval(button: HTMLButtonElement) {
-  button.disabled = true;
-  const warning = document.createElement("p");
-  warning.classList.add("text-yellow-400");
-
-  const interval = setInterval(() => {
-    const timePassed = getResendTimer(button.id);
-
-    if (timePassed) {
-      if (timePassed >= 30) {
-        warning.remove();
-        clearInterval(interval);
-        button.disabled = false;
-        return;
-      }
-
-      const minutes = Math.floor(5 - (timePassed % 3600) / 60);
-      const seconds = Math.floor(60 - (timePassed % 60));
-
-      warning.textContent = `you can resend after ${minutes}min and ${seconds} seconds`;
-      button.after(warning);
-    }
-  }, 1000);
-}
-
-// timer for resending email.
-function setResendTimer(event: Event | string) {
-  let button: HTMLButtonElement;
-  if (typeof event === "string") {
-    button = document.getElementById(event) as HTMLButtonElement;
-  } else {
-    button = event.target as HTMLButtonElement;
-  }
-
-  if (button.id === "resendVerificationEmail") {
-    localStorage.setItem("resendVerificationTimer", Date.now().toString());
-  } else {
-    localStorage.setItem("resendForgotTimer", Date.now().toString());
-  }
-
-  createResendInterval(button);
-}
-
-document
-  .getElementById("resendVerificationEmail")
-  ?.addEventListener("click", setResendTimer);
-document
-  .getElementById("forgotPasswordButton")
-  ?.addEventListener("click", setResendTimer);

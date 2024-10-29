@@ -109,27 +109,6 @@ export const validateBot = defineValidation([
     .escape(),
 
   body("description").optional().matches(notXSS).escape(),
-  body("ai_provider")
-    .matches(notXSS)
-    .matches(noSpaces)
-    .exists()
-    .notEmpty()
-    .withMessage("Ai provider is required!")
-    .trim(),
-  body("ai_model")
-    .matches(notXSS)
-    .matches(noSpaces)
-    .exists()
-    .notEmpty()
-    .withMessage("Ai model is required!")
-    .trim(),
-  body("api_key")
-    .matches(notXSS)
-    .matches(noSpaces)
-    .exists()
-    .notEmpty()
-    .withMessage("Api key for model is required!")
-    .trim(),
 ]);
 
 export const validateBotKnowledge = defineValidation([
@@ -168,7 +147,6 @@ export const validateHook = defineValidation([
     .if(body("api_calling").equals("on"))
     .exists()
     .matches(notXSS)
-    .isLength({ min: 2 })
     .withMessage("hook payload is required")
     .isJSON()
     .withMessage("hook payload should be in json format"),
@@ -178,14 +156,12 @@ export const validateHook = defineValidation([
     .matches(notXSS)
     .matches(noSpaces)
     .notEmpty()
-    .isLength({ min: 3 })
     .withMessage("hook method is required")
     .escape(),
   body("headers")
     .if(body("api_calling").equals("on"))
     .exists()
     .matches(notXSS)
-    .isLength({ min: 3 })
     .withMessage("hook headers are required")
     .isJSON()
     .withMessage("hook headers should be in json format"),

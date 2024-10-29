@@ -7,27 +7,11 @@
         <form onsubmit="event.preventDefault();" class="space-y-6">
           <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
             {{> input name="name" label="Bot Name" type="text" value=data.bot.name warning="This name will be used for
-            chabot" required="required"}}
+            chatbot" required="required"}}
             {{> input name="description" label="Bot Description" type="text" value=data.bot.description}}
             {{#if (eq type "Edit")}}
             {{> input label="Bot ID" type="text" value=data.bot.bot_id disabled="disabled"}}
             {{/if}}
-            {{> select 
-            elements=ai_providers 
-            label="Provider" 
-            class="flex flex-col justify-center" 
-            name="ai_provider" 
-            id="ai_provider" 
-            elem=data.bot.ai_provider 
-            req="req" 
-            url=(concat "/bots/models/") 
-            method="get" 
-            swap="outerHTML" 
-            target="#model-selector-container"
-            recommended="GOOGLE"
-            }}            
-            {{> select label="AI Model" elem=data.bot.ai_model class="flex flex-col justify-center" name="ai_model" elements=ai_models id="model-selector"}}
-            {{> input name="api_key" label="Model Api Key" type="password" value=data.bot.api_key required="required"}}
           </div>
           {{#if (eq type "Edit")}}
           <div class="buttons flex flex-col gap-10 p-2">

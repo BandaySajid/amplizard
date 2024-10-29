@@ -1,9 +1,9 @@
 <div x-data="{ switchOn: {{#if (eq on 'true')}} true {{else}} false {{/if}} }" class="flex items-center space-x-2 my-2">
-  <input id="{{id}}" type="checkbox" name="{{id}}" class="hidden" {{#if (eq on 'true')}} checked {{/if}} :checked="switchOn">
+  <input id="{{id}}" type="checkbox" name="{{id}}" value="{{#if (eq on 'true')}}true{{else}}false{{/if}}" class="hidden" {{#if (eq on 'true')}}  checked {{/if}} :checked="switchOn">
   <button 
         x-ref="switchButton"
         type="button" 
-				@click="switchOn = !switchOn; {{#if onClick}} window['{{onClick}}'].call() {{/if}}"
+				@click="switchOn = !switchOn; elem = document.getElementById('{{id}}'); elem.value = switchOn; console.log(elem.value); elem.dispatchEvent(new Event('input', { bubbles: true })); {{#if onClick}} window['{{onClick}}'].call() {{/if}}"
         :class="switchOn ? 'bg-blue-600' : 'bg-neutral-200'" 
         class="relative inline-flex h-6 py-0.5 ml-4 focus:outline-none rounded-full w-10"
         x-cloak>

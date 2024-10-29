@@ -93,7 +93,6 @@ views_router.get(
 );
 
 views_router.get("/bots", bot_controller.renderBots);
-views_router.get("/bots/models", bot_controller.renderAIModels); //render ai models
 
 views_router.get(
   "/bots/new",

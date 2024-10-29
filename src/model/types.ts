@@ -7,7 +7,7 @@ export enum HarmBlockThreshold {
 }
 
 export enum HarmCategory {
-  HARM_CATEGORY_UNSPECIFIED = "HARM_CATEGORY_UNSPECIFIED",
+  //HARM_CATEGORY_UNSPECIFIED = "HARM_CATEGORY_UNSPECIFIED",
   HARM_CATEGORY_HATE_SPEECH = "HARM_CATEGORY_HATE_SPEECH",
   HARM_CATEGORY_SEXUALLY_EXPLICIT = "HARM_CATEGORY_SEXUALLY_EXPLICIT",
   HARM_CATEGORY_HARASSMENT = "HARM_CATEGORY_HARASSMENT",
@@ -29,14 +29,14 @@ export type ModelConfig = {
   maxSteps?: number;
 };
 
+export type MODEL_TYPE = "hook" | "chat";
+
 export type ModelInitConfig = {
   modelName?: string;
-  provider: string;
   botId?: string;
   chatId?: string;
-  apiKey: string;
-  modelId: string;
   instruction?: string;
   config?: ModelConfig;
   knowledge?: string;
+  type: MODEL_TYPE;
 };

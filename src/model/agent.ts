@@ -30,6 +30,11 @@ const context = getContext();
 
 const chatAgentStore = new Map() as ChatAgentStore;
 
+const hookAgent = prepareHookAgent({
+  type: "hook",
+  config: { maxSteps: 5 },
+});
+
 export function prepareChatAgent(modelInitConfig: ModelInitConfig): Model {
   const name = modelInitConfig.modelName;
 
@@ -40,29 +45,21 @@ export function prepareChatAgent(modelInitConfig: ModelInitConfig): Model {
   history.push(...(context.chatAgent.context as CoreMessage[]));
   if (!modelInitConfig.config) modelInitConfig.config = {};
 
-  const hookAgent = prepareHookAgent({
-    provider: modelInitConfig.provider,
-    apiKey: modelInitConfig.apiKey,
-    modelId: modelInitConfig.modelId,
-    config: { maxSteps: 5 },
-  });
-
   const fetchHookFunctionDeclaration = {
     description: "Fetch available hook to trigger according to the intent.",
     parameters: z
       .object({ intent: z.string() })
       .describe(
-        "What’s your intent? What do you want to accomplish? Clearly state what you’re trying to achieve and what data you need for the AI to effectively identify the relevant hook.",
+        "What's your intent? What do you want to accomplish? what is the query about? What does user need ? Clearly state what you're trying to achieve or what data you need for the AI to effectively identify the relevant hook.",
       ),
     execute: async ({ intent }: { intent: string }) => {
-      console.log("fetching hooks");
       const result = await fetchHookHandler(
         intent,
         modelInitConfig.botId as string,
         hookAgent,
       );
 
-      console.log("got result, fetching hooks", result);
+      console.log("got result from fetching hooks", result);
       return result;
     },
   };
@@ -79,7 +76,8 @@ export function prepareChatAgent(modelInitConfig: ModelInitConfig): Model {
 
 function prepareHookAgent(modelInitConfig: ModelInitConfig) {
   modelInitConfig.instruction = context.hookAgent.instruction;
-  const agent = new Model(modelInitConfig, []);
+  const history = [...context.hookAgent.context] as CoreMessage[];
+  const agent = new Model(modelInitConfig, history);
   return agent;
 }
 
@@ -241,6 +239,8 @@ async function triggerHook(hook: string, data: HookData | TriggerRespError) {
   try {
     const [currentHook] =
       (await db`SELECT * FROM hooks where name = ${hook}`) as Hook[];
+
+    if (!currentHook) return "no hook found";
 
     if (!currentHook.api_calling) {
       return currentHook.response;

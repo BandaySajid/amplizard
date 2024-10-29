@@ -4,7 +4,7 @@ import crypto from "node:crypto";
 import { Hook } from "../types/hook.js";
 import { respError, renderStatus } from "../util.js";
 
-const reqMethods = ["GET", "POST", "PATCH", "PUT", "HEAD"];
+const reqMethods = ["GET", "POST", "PATCH", "PUT"];
 
 export async function handleCreateHook(
   req: express.Request,
@@ -98,7 +98,6 @@ export async function renderHooks(
 ) {
   try {
     const hooks = (await getHooks(req.params.bot_id)) as Hook[];
-    console.log("got hooks", hooks);
     return res.render("bot/hooks", {
       title: "Hooks",
       hooks,

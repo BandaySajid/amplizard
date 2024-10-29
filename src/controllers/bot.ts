@@ -8,17 +8,12 @@ import * as util from "../util.js";
 import { body, validationResult } from "express-validator";
 import { prepareChatAgent, getChatAgent } from "../model/agent.js";
 import config from "../config.js";
-import { MODEL_IDS } from "../model/model_types.js";
-const ai_providers = Object.keys(MODEL_IDS);
 
 type Bot = {
   bot_id: crypto.UUID;
   name: string;
   description?: string;
   knowledge?: string;
-  ai_provider: string;
-  ai_model: string;
-  api_key: string;
 };
 
 // const MAX_FILE_SIZE = 20 * (1000 * 1000);
@@ -34,21 +29,6 @@ const REMOTEHOST = `https://amplizard.com`;
 //   "image/heif",
 // ];
 
-function validateProvider(provider: string) {
-  if (MODEL_IDS[provider as keyof typeof MODEL_IDS]) {
-    return true;
-  }
-  return false;
-}
-
-function validateModel(provider: string, model: string) {
-  const models = Object.values(MODEL_IDS[provider as keyof typeof MODEL_IDS]);
-  if (models[model as keyof typeof models]) {
-    return true;
-  }
-  return false;
-}
-
 async function deleteBotCache(botId: string): Promise<void> {
   await redis.del(botId);
 }
@@ -61,23 +41,11 @@ export async function handleCreateBot(
   try {
     const bot_id = crypto.randomUUID();
 
-    const { name, description, ai_provider, ai_model, api_key } = req.body;
-
-    const models = MODEL_IDS[ai_provider as keyof typeof MODEL_IDS];
-
-    if (!models[ai_model as keyof typeof models]) {
-      return res.status(404).json({
-        status: "error",
-        description: "Model or provider does not exist!",
-      });
-    }
+    const { name, description } = req.body;
 
     const bot = {
       bot_id,
       name,
-      ai_provider,
-      ai_model,
-      api_key,
     } as Bot;
 
     if (description) bot.description = description;
@@ -101,7 +69,7 @@ export function renderCreateBot(_: express.Request, res: express.Response) {
     type: "New",
     method: "post",
     url: `/api/v1/bots`,
-    ai_providers,
+    //ai_providers,
   });
 }
 
@@ -154,41 +122,6 @@ export async function handleUpdateBotKnowledge(
   }
 }
 
-export function renderAIModels(
-  req: express.Request,
-  res: express.Response,
-  next: express.NextFunction,
-) {
-  try {
-    const provider = req.query.ai_provider;
-    let elements: string[] = [];
-    const renderObj = {
-      elements,
-      label: "AI Model",
-      id: "model-selector",
-      name: "ai_model",
-      class: "flex flex-col justify-center",
-      layout: false,
-    };
-    if (!provider) {
-      for (const p of ai_providers) {
-        for (const m of Object.values(MODEL_IDS[p as keyof typeof MODEL_IDS])) {
-          elements.push(m);
-        }
-      }
-      renderObj.elements = elements;
-      return res.status(200).render("partials/select", renderObj);
-    }
-    elements = Object.values(MODEL_IDS[provider as keyof typeof MODEL_IDS]);
-    console.log("got elements", elements);
-    renderObj.elements = elements;
-    console.log("final renderObj", renderObj);
-    return res.status(200).render("partials/select", renderObj);
-  } catch (err) {
-    next(err);
-  }
-}
-
 async function getBot(bot_id: string) {
   const [bot] = await db`SELECT * FROM bots where bot_id = ${bot_id}`;
 
@@ -232,13 +165,7 @@ export async function handleUpdateBot(
   try {
     const { id } = req.params;
 
-    const allowed_updates = [
-      "name",
-      "description",
-      "ai_provider",
-      "ai_model",
-      "api_key",
-    ];
+    const allowed_updates = ["name", "description"];
 
     const requested_updates = Object.keys(req.body);
 
@@ -266,28 +193,6 @@ export async function handleUpdateBot(
 
     const bot = existing_values[0] as Bot;
 
-    if (req.body.ai_provider) {
-      const providerVal = validateProvider(req.body.ai_provider);
-
-      if (!providerVal) {
-        return res.status(404).json({
-          status: "error",
-          description: `${req.body.ai_provider} is not a supported AI provider!`,
-        });
-      }
-    }
-
-    if (req.body.ai_model) {
-      const modelVal = validateModel(req.body.ai_provider, req.body.ai_model);
-
-      if (!modelVal) {
-        return res.status(404).json({
-          status: "error",
-          description: `${req.body.ai_model} is not a supported AI model!`,
-        });
-      }
-    }
-
     await db`UPDATE bots SET ${db(req.body)} where bot_id = ${bot.bot_id}`;
 
     renderStatus(200, "bot updated successfully!", res);
@@ -313,18 +218,12 @@ export async function renderEditBot(
 
     data.bot = bot;
 
-    const ai_models = Object.values(
-      MODEL_IDS[bot.ai_provider as keyof typeof MODEL_IDS],
-    );
-
     return res.render("bot/edit-bot", {
       title: "Edit",
       data,
       type: "Edit",
       method: "put",
       url: `/api/v1/bots/${req.params.id}`,
-      ai_providers,
-      ai_models,
     });
   } catch (err) {
     next(err);
@@ -364,21 +263,16 @@ export async function handleDeleteBot(
 async function createNewChat(
   botId: string,
   botName: string,
-  provider: string,
-  modelId: string,
-  apiKey: string,
   knowledge?: string,
 ): Promise<string> {
   const chatId = crypto.randomUUID();
 
   prepareChatAgent({
-    provider,
     modelName: botName,
     botId,
     chatId,
-    apiKey,
-    modelId,
     knowledge,
+    type: "chat",
     config: { maxSteps: 5 },
   });
 
@@ -420,9 +314,6 @@ export async function handleCreateChatSession(
     const newChatId = await createNewChat(
       exBot.bot_id,
       exBot.name,
-      exBot.ai_provider,
-      exBot.ai_model,
-      exBot.api_key,
       exBot.knowledge,
     );
 

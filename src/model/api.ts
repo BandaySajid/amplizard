@@ -1,13 +1,10 @@
 import { LanguageModelV1 } from "ai";
 
-import { MODEL_IDS } from "./model_types.js";
-import { GEN_AI_PROVIDER, HarmCategory, HarmBlockThreshold } from "./types.js";
-import { createAIProvider } from "./provider.js";
+import { HarmCategory, HarmBlockThreshold } from "./types.js";
 
-type GEN_AI = {
-  provider: string;
-  model: string;
-};
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+
+const MODEL_ID = "gemini-1.5-flash";
 
 // Default safety settings
 const safetySettings = [
@@ -29,18 +26,13 @@ const safetySettings = [
   },
 ];
 
-export function initGenAI(AI: GEN_AI, apiKey: string): LanguageModelV1 {
-  if (!(AI.provider in GEN_AI_PROVIDER)) {
-    throw new Error("Unknown AI provider");
+export function initGenAI(apiKey: string): LanguageModelV1[] {
+  const AIs: LanguageModelV1[] = [];
+  const apiKeys = apiKey.split(",");
+  for (const key of apiKeys) {
+    const provider = createGoogleGenerativeAI({ apiKey: key });
+    const ai = provider(MODEL_ID, { safetySettings: safetySettings });
+    AIs.push(ai);
   }
-
-  if (!(AI.model in MODEL_IDS[AI.provider as keyof typeof MODEL_IDS])) {
-    throw new Error(`Unknown AI Model for provider ${AI.provider}`);
-  }
-
-  const provider = createAIProvider(AI.provider, apiKey);
-
-  const model = provider(AI.model); //TODO: modify this to support model config, like safety settings etc.
-
-  return model;
+  return AIs;
 }

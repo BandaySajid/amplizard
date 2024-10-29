@@ -15,7 +15,7 @@
         "toolCallId": "0",
         "toolName": "fetchHook",
         "args": {
-          "intent": "Need user data"
+          "intent": "Need the data of the current user."
         }
       }
     ]
@@ -102,7 +102,7 @@
         "toolCallId": "0",
         "toolName": "fetchHook",
         "args": {
-          "intent": "Need order data"
+          "intent": "Need the order data"
         }
       }
     ]
@@ -255,7 +255,7 @@
         "toolCallId": "0",
         "toolName": "fetchHook",
         "args": {
-          "intent": "Need current user data"
+          "intent": "Need the data of the current user."
         }
       }
     ]
@@ -380,6 +380,84 @@
       {
         "type": "text",
         "text": "Thank you! Have a great day!\n"
+      }
+    ]
+  },
+
+  {
+    "role": "user",
+    "content": "Who is the cto of this company and when was it established?"
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": ""
+      },
+      {
+        "type": "tool-call",
+        "toolCallId": "0",
+        "toolName": "fetchHook",
+        "args": {
+          "intent": "Need to know who is the cto of this company."
+        }
+      }
+    ]
+  },
+
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "0",
+        "toolName": "fetchHook",
+        "result": {
+          "result": "{\"hook\":{\"name\":\"getCTOName\",\"signal\":\"When the current user data is needed / required\", \"response\": \"Company cto is Yasir.\"}}"
+        }
+      }
+    ]
+  },
+
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": ""
+      },
+      {
+        "type": "tool-call",
+        "toolCallId": "1",
+        "toolName": "fetchHook",
+        "args": {
+          "intent": "Need to know when this company was established."
+        }
+      }
+    ]
+  },
+
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "1",
+        "toolName": "fetchHook",
+        "result": {
+          "result": "{\"hook\":{\"name\":\"getCompanyEstablishmentDate\",\"signal\":\"When the company establishment date is needed / required\", \"response\": \"Company was established in june 2022.\"}}"
+        }
+      }
+    ]
+  },
+
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Yasir is the cto of this company.\n"
       }
     ]
   }
