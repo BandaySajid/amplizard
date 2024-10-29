@@ -12,7 +12,7 @@ const MODELS = {
 };
 
 console.log(
-  `initialized ${MODELS.chat.length} chat models and ${MODELS.hook.length} hook models.`,
+  `initialized ${MODELS.chat.length} chat agents and ${MODELS.hook.length} hook agents.`,
 );
 
 type ModelIndex = {
@@ -39,6 +39,7 @@ export class Model {
   static indexes: ModelIndex = { chat: -1, hook: -1 };
   private type: MODEL_TYPE;
   private tokens: TokenUsage;
+  public currentUserQuery: string | null;
 
   constructor(
     {
@@ -52,6 +53,7 @@ export class Model {
     }: ModelInitConfig,
     history: CoreMessage[],
   ) {
+    this.currentUserQuery = null;
     this.chatId = chatId;
     this.botId = botId;
     this.modelName = modelName;
@@ -83,6 +85,8 @@ export class Model {
 
   async sendMessage(userPrompt: string, _: boolean = false): Promise<string> {
     //TODO: implement message streaming.
+
+    this.currentUserQuery = userPrompt;
 
     Model.balanceModels(this.type);
 

@@ -5,7 +5,7 @@ import { HarmCategory, HarmBlockThreshold } from "./types.js";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 
 const MODEL_ID = "gemini-1.5-flash";
-const DEFAULT_CACHE_NAME = "context_cache";
+//const DEFAULT_CACHE_NAME = "context_cache";
 
 // Default safety settings
 const safetySettings = [
@@ -34,7 +34,7 @@ export function initGenAI(apiKey: string): LanguageModelV1[] {
     const provider = createGoogleGenerativeAI({ apiKey: key });
     const ai = provider(MODEL_ID, {
       safetySettings: safetySettings,
-      cachedContent: DEFAULT_CACHE_NAME,
+      //cachedContent: DEFAULT_CACHE_NAME,
     });
     AIs.push(ai);
   }

@@ -49,6 +49,10 @@ export async function prepareChatAgent(
 
   if (!modelInitConfig.config) modelInitConfig.config = {};
 
+  modelInitConfig.instruction = context.chatAgent.instruction;
+
+  const agent = new Model(modelInitConfig, history);
+
   const fetchHookFunctionDeclaration = {
     description: "Fetch available hook to trigger according to the intent.",
     parameters: z
@@ -61,6 +65,7 @@ export async function prepareChatAgent(
         intent,
         modelInitConfig.botId as string,
         hookAgent,
+        agent.currentUserQuery as string,
       );
 
       console.log("got result from fetching hooks", result);
@@ -76,9 +81,6 @@ export async function prepareChatAgent(
   //   context.chatAgent.context as CoreMessage[],
   // );
 
-  modelInitConfig.instruction = context.chatAgent.instruction;
-
-  const agent = new Model(modelInitConfig, history);
   agent.addTool("fetchHook", fetchHookFunctionDeclaration);
   agent.addTool("triggerHook", triggerHookFunctionDeclaration);
   chatAgentStore.set(modelInitConfig.chatId as ChatId, agent);
@@ -107,6 +109,7 @@ async function fetchHookHandler(
   intent: string,
   bot_id: string,
   hookAgent: Model,
+  currentUserQuery: string,
 ) {
   try {
     const hooks = await db`SELECT * FROM hooks where bot_id = ${bot_id}`;
@@ -137,6 +140,8 @@ async function fetchHookHandler(
     });
 
     console.log("[FETCHED-HOOKS]:", modHooks);
+    console.log({ intent, currentUserQuery });
+
     if (modHooks.length <= 0) {
       return {
         result: {
@@ -145,9 +150,8 @@ async function fetchHookHandler(
         },
       };
     } else {
-      console.log("Model's intent is:", intent);
       let finalFetchedHook = await hookAgent.sendMessage(
-        `Intent: ${intent}\nHooks: ${JSON.stringify(modHooks)}.\n Return the hook that specifically satisfies the intent and can perform the action that intent expects, otherwise just say 'No relevant hooks available to trigger'. Make sure the hook is returned in correct json format, just the json object, not a markdown format,`,
+        `User: ${currentUserQuery}\nIntent: ${intent}\nHooks: ${JSON.stringify(modHooks)}.\n Return the hook that specifically satisfies the intent and the query and can perform the action that intent expects, otherwise just say 'No relevant hooks available to trigger'. Make sure the hook is returned in correct json format, just the json object, not a markdown format,`,
       );
 
       console.log("final fetched hook:", finalFetchedHook);
