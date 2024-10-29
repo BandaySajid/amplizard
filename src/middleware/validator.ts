@@ -1,4 +1,4 @@
-import { body, validationResult, query } from "express-validator";
+import { body, validationResult } from "express-validator";
 import express from "express";
 
 const notXSS = /^(?!.*<[^>]*>).*/;

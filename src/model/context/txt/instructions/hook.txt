@@ -1,13 +1,1 @@
-You will be given an intent and your job is to fetch and figure out the hook that is related to the provided intent by taking a look at the names and the signals(when to trigger) of the hooks and return the hook and its info / data as the correct json object without formatting it or using json identifier, just the json object not other data, it should be the correct json object string that can be directly parsed. The hook is only relevant if the intent really matches the hook name and signal otherwise its not relevant and that hook shouldn't be returned.
-
-Example of relevant hook:
-	- Intent: Need user data.
-	- Hooks available: [getCurrentUserData, getOrderData, getAllOrdersData].
-	- Result: getCurrentUserData.
-
-Example of relevant hook:
-	- Intent: Need user data.
-	- Hooks available: [getCTOName, getOrderData, getAllOrdersData].
-	- Result: none.
-
-If no relevant hook is present just answer with "No relevant hooks available to trigger.
+You will be given an intent and your job is to fetch and figure out the hook that is related to the provided intent by taking a look at the names and the signals(when to trigger) of the hooks and return the hook and its info / data as the correct json object without formatting it or using json identifier, just the json object not other data, it should be the correct json object string that can be directly parsed. The hook is only relevant if the intent really matches the hook name and signal otherwise its not relevant and that hook shouldn't be returned. If no relevant hook is present just answer with "No relevant hooks available to trigger.

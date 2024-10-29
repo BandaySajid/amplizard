@@ -4,6 +4,7 @@ import { CoreMessage, CoreTool, LanguageModelV1, generateText, tool } from "ai";
 import { initGenAI } from "./api.js";
 import { ModelInitConfig, ModelConfig, MODEL_TYPE } from "./types.js";
 import config from "../config.js";
+import fs from "node:fs/promises";
 
 const MODELS = {
   chat: initGenAI(config.gemini.chat_api_key),
@@ -19,6 +20,12 @@ type ModelIndex = {
   hook: number;
 };
 
+type TokenUsage = {
+  input: number;
+  output: number;
+  total: number;
+};
+
 export class Model {
   public chatId?: string;
   public botId?: string;
@@ -26,11 +33,12 @@ export class Model {
   static model: LanguageModelV1;
   private history?: CoreMessage[];
   public knowledge?: CoreMessage;
-  public systemInstruction: CoreMessage;
+  public systemInstruction: CoreMessage | undefined;
   private tools: Record<string, CoreTool<any, any>>;
   private modelConfig: ModelConfig;
   static indexes: ModelIndex = { chat: -1, hook: -1 };
   private type: MODEL_TYPE;
+  private tokens: TokenUsage;
 
   constructor(
     {
@@ -47,7 +55,19 @@ export class Model {
     this.chatId = chatId;
     this.botId = botId;
     this.modelName = modelName;
-    this.systemInstruction = { role: "system", content: instruction as string };
+    this.history = [];
+
+    //TODO: Context Caching
+
+    if (instruction) {
+      this.systemInstruction = {
+        role: "system",
+        content: instruction as string,
+      };
+      this.history?.push(this.systemInstruction);
+    } else {
+      this.systemInstruction = undefined;
+    }
     this.knowledge = {
       role: "system",
       content: "Knowledge base: " + knowledge,
@@ -56,7 +76,9 @@ export class Model {
     this.modelConfig = { ...config };
     this.type = type;
 
-    this.history = [this.systemInstruction, this.knowledge, ...history];
+    this.history?.push(this.knowledge);
+    this.history?.push(...history);
+    this.tokens = { input: 0, output: 0, total: 0 };
   }
 
   async sendMessage(userPrompt: string, _: boolean = false): Promise<string> {
@@ -85,7 +107,15 @@ export class Model {
       this.history?.push(msg);
     }
 
-    console.log(`${this.type}-USAGE :`, result.usage);
+    this.tokens.input += result.usage.promptTokens;
+    this.tokens.output += result.usage.completionTokens;
+    this.tokens.total += result.usage.totalTokens;
+
+    //await fs.writeFile("chat.json", JSON.stringify(this.history));
+
+    //console.log("chat history dumped to a file");
+
+    console.log("TOKEN USAGE:", this.tokens);
 
     return result.text;
   }

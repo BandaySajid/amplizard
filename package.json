@@ -9,6 +9,7 @@
     "@ai-sdk/google-vertex": "^0.0.39",
     "@ai-sdk/mistral": "^0.0.42",
     "@ai-sdk/openai": "^0.0.59",
+    "@google/generative-ai": "^0.21.0",
     "ai": "^3.3.35",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",

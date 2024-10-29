@@ -31,6 +31,7 @@ export default {
   gemini: {
     chat_api_key: process.env.GEMINI_CHAT_API_KEY || "",
     hook_api_key: process.env.GEMINI_HOOK_API_KEY || "",
+    cache_api_key: process.env.GEMINI_CACHE_API_KEY || "",
   },
 
   dirname: (meta_url) => {

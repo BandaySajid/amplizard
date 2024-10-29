@@ -6,6 +6,7 @@ import { db } from "../db/connection.js";
 import { jsonrepair } from "jsonrepair";
 import { Hook } from "../types/hook.js";
 import { z } from "zod";
+//import { cacheContext } from "./context/cache.js";
 
 type ChatId = string;
 type ChatAgentStore = Map<ChatId, Model>;
@@ -35,7 +36,9 @@ const hookAgent = prepareHookAgent({
   config: { maxSteps: 5 },
 });
 
-export function prepareChatAgent(modelInitConfig: ModelInitConfig): Model {
+export async function prepareChatAgent(
+  modelInitConfig: ModelInitConfig,
+): Promise<Model> {
   const name = modelInitConfig.modelName;
 
   const history = [
@@ -43,6 +46,7 @@ export function prepareChatAgent(modelInitConfig: ModelInitConfig): Model {
   ] as CoreMessage[];
 
   history.push(...(context.chatAgent.context as CoreMessage[]));
+
   if (!modelInitConfig.config) modelInitConfig.config = {};
 
   const fetchHookFunctionDeclaration = {
@@ -50,7 +54,7 @@ export function prepareChatAgent(modelInitConfig: ModelInitConfig): Model {
     parameters: z
       .object({ intent: z.string() })
       .describe(
-        "What's your intent? What do you want to accomplish? what is the query about? What does user need ? Clearly state what you're trying to achieve or what data you need for the AI to effectively identify the relevant hook.",
+        "What's your intent? What do you want to accomplish? what is the query about? What does user need ? Clearly state what you're trying to achieve or what data you need for the AI to effectively identify the relevant hook. Example: Need ceo name because user wants to know the name of the ceo",
       ),
     execute: async ({ intent }: { intent: string }) => {
       const result = await fetchHookHandler(
@@ -64,6 +68,14 @@ export function prepareChatAgent(modelInitConfig: ModelInitConfig): Model {
     },
   };
 
+  //TODO: Context Caching
+  // await cacheContext(
+  //   "gemini-1.5-flash-001",
+  //   "context_cache",
+  //   context.chatAgent.instruction as string,
+  //   context.chatAgent.context as CoreMessage[],
+  // );
+
   modelInitConfig.instruction = context.chatAgent.instruction;
 
   const agent = new Model(modelInitConfig, history);
@@ -75,9 +87,9 @@ export function prepareChatAgent(modelInitConfig: ModelInitConfig): Model {
 }
 
 function prepareHookAgent(modelInitConfig: ModelInitConfig) {
-  modelInitConfig.instruction = context.hookAgent.instruction;
-  const history = [...context.hookAgent.context] as CoreMessage[];
-  const agent = new Model(modelInitConfig, history);
+  //modelInitConfig.instruction = context.hookAgent.instruction;
+  //const history = [...context.hookAgent.context] as CoreMessage[];
+  const agent = new Model(modelInitConfig, []);
   return agent;
 }
 
@@ -118,7 +130,6 @@ async function fetchHookHandler(
 
       return {
         name: hook.name,
-        url: hook.url,
         signal: hook.signal,
         response: hook.response,
         rephrase: hook.rephrase,
@@ -136,7 +147,7 @@ async function fetchHookHandler(
     } else {
       console.log("Model's intent is:", intent);
       let finalFetchedHook = await hookAgent.sendMessage(
-        `Intent: ${intent}\nHooks: ${JSON.stringify(modHooks)}`,
+        `Intent: ${intent}\nHooks: ${JSON.stringify(modHooks)}.\n Return the hook that specifically satisfies the intent and can perform the action that intent expects, otherwise just say 'No relevant hooks available to trigger'. Make sure the hook is returned in correct json format, just the json object, not a markdown format,`,
       );
 
       console.log("final fetched hook:", finalFetchedHook);

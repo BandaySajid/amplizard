@@ -15,7 +15,7 @@
         "toolCallId": "0",
         "toolName": "fetchHook",
         "args": {
-          "intent": "Need the data of the current user."
+          "intent": "Need the data of the current user so that further operations on behalf of that user can be performed."
         }
       }
     ]
@@ -75,7 +75,7 @@
   },
   {
     "role": "user",
-    "content": "I want to cancel an order with id 101?"
+    "content": "I want to cancel an order with id 101"
   },
   {
     "role": "assistant",
@@ -102,7 +102,7 @@
         "toolCallId": "0",
         "toolName": "fetchHook",
         "args": {
-          "intent": "Need the order data"
+          "intent": "Need the order data to verify if the order is present for a user."
         }
       }
     ]
@@ -172,7 +172,7 @@
         "toolCallId": "0",
         "toolName": "fetchHook",
         "args": {
-          "intent": "Need to cancel an order"
+          "intent": "Need to cancel an order because its the users query"
         }
       }
     ]
@@ -255,7 +255,7 @@
         "toolCallId": "0",
         "toolName": "fetchHook",
         "args": {
-          "intent": "Need the data of the current user."
+          "intent": "Need the data of the current user so that I can further proceed with user's query."
         }
       }
     ]
@@ -316,7 +316,7 @@
         "toolCallId": "2",
         "toolName": "fetchHook",
         "args": {
-          "intent": "Need order data"
+          "intent": "Need order data so that I can provide info about it to the user."
         }
       }
     ]
@@ -400,7 +400,7 @@
         "toolCallId": "0",
         "toolName": "fetchHook",
         "args": {
-          "intent": "Need to know who is the cto of this company."
+          "intent": "Need to know who is the cto of this company, because its the user's query"
         }
       }
     ]
