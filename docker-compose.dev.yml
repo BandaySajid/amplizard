@@ -5,7 +5,6 @@ services:
     ports:
       - "6379:6379"
   postgres:
-    container_name: amplizard_db
     image: postgres:16-alpine
     env_file: ".env" #comment out this line if you want to provide env vars directly, and use the env vars given below.
     #environment:

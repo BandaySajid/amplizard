@@ -29,6 +29,25 @@ interface TriggerRespError {
 
 const context = getContext();
 
+const chatAgentContext = [
+  {
+    role: "system",
+    content: context.chatAgent.instruction,
+  },
+  ...context.chatAgent.context,
+];
+
+const hookAgentContext = [
+  {
+    role: "system",
+    content: context.hookAgent.instruction,
+  },
+  ...context.hookAgent.context,
+];
+
+Model.setContext("chat", chatAgentContext as CoreMessage[]);
+Model.setContext("hook", hookAgentContext as CoreMessage[]);
+
 const chatAgentStore = new Map() as ChatAgentStore;
 
 const hookAgent = prepareHookAgent({
@@ -39,19 +58,9 @@ const hookAgent = prepareHookAgent({
 export async function prepareChatAgent(
   modelInitConfig: ModelInitConfig,
 ): Promise<Model> {
-  const name = modelInitConfig.modelName;
-
-  const history = [
-    { role: "system", content: `Your name is: ${name}` },
-  ] as CoreMessage[];
-
-  history.push(...(context.chatAgent.context as CoreMessage[]));
-
   if (!modelInitConfig.config) modelInitConfig.config = {};
 
-  modelInitConfig.instruction = context.chatAgent.instruction;
-
-  const agent = new Model(modelInitConfig, history);
+  const agent = new Model(modelInitConfig, []);
 
   const fetchHookFunctionDeclaration = {
     description: "Fetch available hook to trigger according to the intent.",

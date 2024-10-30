@@ -4,7 +4,6 @@ import { CoreMessage, CoreTool, LanguageModelV1, generateText, tool } from "ai";
 import { initGenAI } from "./api.js";
 import { ModelInitConfig, ModelConfig, MODEL_TYPE } from "./types.js";
 import config from "../config.js";
-import fs from "node:fs/promises";
 
 const MODELS = {
   chat: initGenAI(config.gemini.chat_api_key),
@@ -26,14 +25,19 @@ type TokenUsage = {
   total: number;
 };
 
+type Context = CoreMessage[];
+
+type ModelContext = {
+  [key: string]: Context;
+};
+
 export class Model {
   public chatId?: string;
   public botId?: string;
   public modelName?: string;
   static model: LanguageModelV1;
-  private history?: CoreMessage[];
-  public knowledge?: CoreMessage;
-  public systemInstruction: CoreMessage | undefined;
+  static context: ModelContext = {};
+  private history: CoreMessage[];
   private tools: Record<string, CoreTool<any, any>>;
   private modelConfig: ModelConfig;
   static indexes: ModelIndex = { chat: -1, hook: -1 };
@@ -42,15 +46,7 @@ export class Model {
   public currentUserQuery: string | null;
 
   constructor(
-    {
-      modelName,
-      botId,
-      chatId,
-      instruction,
-      config,
-      knowledge,
-      type,
-    }: ModelInitConfig,
+    { modelName, botId, chatId, config, type }: ModelInitConfig,
     history: CoreMessage[],
   ) {
     this.currentUserQuery = null;
@@ -61,25 +57,11 @@ export class Model {
 
     //TODO: Context Caching
 
-    if (instruction) {
-      this.systemInstruction = {
-        role: "system",
-        content: instruction as string,
-      };
-      this.history?.push(this.systemInstruction);
-    } else {
-      this.systemInstruction = undefined;
-    }
-    this.knowledge = {
-      role: "system",
-      content: "Knowledge base: " + knowledge,
-    };
     this.tools = {};
     this.modelConfig = { ...config };
     this.type = type;
 
-    this.history?.push(this.knowledge);
-    this.history?.push(...history);
+    this.history.push(...history);
     this.tokens = { input: 0, output: 0, total: 0 };
   }
 
@@ -90,38 +72,45 @@ export class Model {
 
     Model.balanceModels(this.type);
 
-    console.log("Total no. of models:", MODELS["chat"].length);
-    console.log(
-      `using model number for (${this.type}):`,
-      Model.indexes[this.type],
-    );
+    this.history.push({ role: "user", content: userPrompt });
 
-    this.history?.push({ role: "user", content: userPrompt });
+    //so that we intitialize each instance of model with only its own chat history and not with the context, since the context or system prompts are same for all models / agents.
+    const historyWithContext = [
+      {
+        role: "system",
+        content: `Your name from now is: ${this.modelName}, remember this.`,
+      } as CoreMessage,
+      ...Model.getContext(this.type),
+      ...this.history,
+    ];
 
     const result = await generateText({
       model: Model.model!,
-      //temperature: 0,
-      //prompt: prompt, // used without message history.
+      //temperature: 1,
       tools: this.tools,
-      messages: this.history,
+      messages: historyWithContext,
       ...this.modelConfig,
     });
 
     for (const msg of result.responseMessages) {
-      this.history?.push(msg);
+      this.history.push(msg);
     }
 
-    this.tokens.input += result.usage.promptTokens;
-    this.tokens.output += result.usage.completionTokens;
-    this.tokens.total += result.usage.totalTokens;
-
-    //await fs.writeFile("chat.json", JSON.stringify(this.history));
-
-    //console.log("chat history dumped to a file");
-
-    console.log("TOKEN USAGE:", this.tokens);
+    // this.tokens.input += result.usage.promptTokens;
+    // this.tokens.output += result.usage.completionTokens;
+    // this.tokens.total += result.usage.totalTokens;
+    //
+    // console.log("TOKEN USAGE:", this.tokens);
 
     return result.text;
+  }
+
+  static setContext(key: string, context: Context) {
+    Model.context[key] = context;
+  }
+
+  static getContext(key: string): Context {
+    return Model.context[key];
   }
 
   static balanceModels(type: MODEL_TYPE) {

@@ -383,7 +383,6 @@
       }
     ]
   },
-
   {
     "role": "user",
     "content": "Who is the cto of this company and when was it established?"
@@ -405,7 +404,6 @@
       }
     ]
   },
-
   {
     "role": "tool",
     "content": [
@@ -419,7 +417,6 @@
       }
     ]
   },
-
   {
     "role": "assistant",
     "content": [
@@ -437,7 +434,6 @@
       }
     ]
   },
-
   {
     "role": "tool",
     "content": [
@@ -451,7 +447,6 @@
       }
     ]
   },
-
   {
     "role": "assistant",
     "content": [
@@ -462,3 +457,4 @@
     ]
   }
 ]
+

@@ -7,7 +7,7 @@ export default {
   server: {
     host: process.env.host || "localhost",
     port: Number(process.env.port) || 9090,
-    remote_host: process.env.REMOTE_HOST | "",
+    remote_host: process.env.remote_host || "",
   },
 
   websocket: {

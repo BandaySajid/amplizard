@@ -267,7 +267,7 @@ async function createNewChat(
 ): Promise<string> {
   const chatId = crypto.randomUUID();
 
-  prepareChatAgent({
+  await prepareChatAgent({
     modelName: botName,
     botId,
     chatId,
