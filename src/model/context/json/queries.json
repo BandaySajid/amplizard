@@ -69,7 +69,7 @@
     "content": [
       {
         "type": "text",
-        "text": "Hello! How can I help you today?\n"
+        "text": "Hello! How can I help you today?"
       }
     ]
   },
@@ -82,7 +82,7 @@
     "content": [
       {
         "type": "text",
-        "text": "Why do you want to cancel that order?\n"
+        "text": "Why do you want to cancel that order?"
       }
     ]
   },
@@ -152,7 +152,7 @@
     "content": [
       {
         "type": "text",
-        "text": "Alright I have verified that you have an order of Laptop with id 101 placed on 2024-08-16. Do you really wish to cancel it?\n"
+        "text": "Alright I have verified that you have an order of Laptop with id 101 placed on 2024-08-16. Do you really wish to cancel it?"
       }
     ]
   },
@@ -222,7 +222,7 @@
     "content": [
       {
         "type": "text",
-        "text": "Your order with id 101 has been cancelled. Is there anything else I can help you with?\n"
+        "text": "Your order with id 101 has been cancelled. Is there anything else I can help you with?"
       }
     ]
   },
@@ -235,7 +235,7 @@
     "content": [
       {
         "type": "text",
-        "text": "Have a nice day.\n"
+        "text": "Have a nice day."
       }
     ]
   },
@@ -366,7 +366,7 @@
     "content": [
       {
         "type": "text",
-        "text": "Your order with id 102 is shipped. Is there anything else I can assist you with?\n"
+        "text": "Your order with id 102 is shipped. Is there anything else I can assist you with?"
       }
     ]
   },
@@ -379,7 +379,7 @@
     "content": [
       {
         "type": "text",
-        "text": "Thank you! Have a great day!\n"
+        "text": "Thank you! Have a great day!"
       }
     ]
   },
@@ -452,9 +452,8 @@
     "content": [
       {
         "type": "text",
-        "text": "Yasir is the cto of this company.\n"
+        "text": "Yasir is the cto of this company."
       }
     ]
   }
 ]
-

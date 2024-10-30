@@ -8,6 +8,7 @@ import * as util from "../util.js";
 import { body, validationResult } from "express-validator";
 import { prepareChatAgent, getChatAgent } from "../model/agent.js";
 import config from "../config.js";
+import { CoreMessage } from "ai";
 
 type Bot = {
   bot_id: crypto.UUID;
@@ -28,6 +29,35 @@ const REMOTEHOST = `https://amplizard.com`;
 //   "image/heic",
 //   "image/heif",
 // ];
+
+//formatting model chat history to ui compatible chat history.
+function formatChatHistory(history: CoreMessage[]) {
+  const final = history
+    .map((msg) => {
+      let sender;
+      let message;
+      if (msg.role === "assistant") {
+        sender = "AI";
+      } else if (msg.role === "user") {
+        sender = "user";
+      }
+      if (typeof msg.content === "string") {
+        message = msg.content;
+      } else if (Array.isArray(msg.content)) {
+        const c = msg.content[0];
+        if (c.type === "text") {
+          message = c.text;
+        }
+      }
+
+      if (sender && message) {
+        return { sender, message };
+      }
+    })
+    .filter((m) => m);
+
+  return final;
+}
 
 async function deleteBotCache(botId: string): Promise<void> {
   await redis.del(botId);
@@ -409,19 +439,23 @@ export async function handleRenderChat(
       });
     }
 
-    const bot = (await util.getBotCache(chatSession.botId as string)) as Bot;
-
-    if (!bot) {
-      return respError(404, "bot does not exist!", res);
-    }
+    // const bot = (await util.getBotCache(chatSession.botId as string)) as Bot;
+    //
+    // if (!bot) {
+    //   return respError(404, "bot does not exist!", res);
+    // }
 
     const botData = {
-      name: bot.name,
+      name: chatSession.modelName,
       botId: chatSession.botId,
       chatId: chatId,
     };
 
-    const endpoint = `/api/v1/bots/${bot.bot_id}/chat/${chatId}`;
+    const endpoint = `/api/v1/bots/${botData.botId}/chat/${chatId}`;
+
+    const history = formatChatHistory(chatSession.getHistory());
+
+    console.log("chat history", history);
 
     return res.render("chatbot", {
       title: "bot",
@@ -431,6 +465,7 @@ export async function handleRenderChat(
         config.environment === "production"
           ? REMOTEHOST + endpoint
           : LOCALHOST + endpoint,
+      history,
     });
   } catch (err) {
     next(err);
