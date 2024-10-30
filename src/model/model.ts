@@ -92,15 +92,17 @@ export class Model {
       ...this.modelConfig,
     });
 
-    for (const msg of result.responseMessages) {
+    for (const msg of result.response.messages) {
       this.history.push(msg);
     }
 
-    // this.tokens.input += result.usage.promptTokens;
-    // this.tokens.output += result.usage.completionTokens;
-    // this.tokens.total += result.usage.totalTokens;
-    //
-    // console.log("TOKEN USAGE:", this.tokens);
+    console.log("Current token usage:", result.usage);
+
+    this.tokens.input += result.usage.promptTokens;
+    this.tokens.output += result.usage.completionTokens;
+    this.tokens.total += result.usage.totalTokens;
+
+    console.log("Total token usage:", this.tokens);
 
     return result.text;
   }
