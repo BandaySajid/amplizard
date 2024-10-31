@@ -371,33 +371,32 @@ export async function handleChat(
       return respError(400, "message or a file is required!", res);
     }
 
-    let model = getChatAgent(chat_id);
+    let agent = getChatAgent(chat_id);
 
-    if (!model) {
+    if (!agent) {
       return respError(404, "chat history does not exist!", res);
     }
 
-    const message = await model.sendMessage(prompt);
+    const message = await agent.sendMessage(prompt);
 
-    const modelName = model.modelName;
+    const modelName = agent.modelName;
 
-    // if (model.closed) {
-    //   console.log("model has been closed with reason:", model.closeMessage);
-    //   if (htmxRequest) {
-    //     return res.status(200).render("components/chatClosed", {
-    //       message: model.closeMessage,
-    //       redirectUrl: "/",
-    //       sender: "system",
-    //     });
-    //   }
-    //
-    //   return res.status(200).json({
-    //     status: "success",
-    //     sender: "system",
-    //     name: modelName,
-    //     closed: true,
-    //   });
-    // }
+    if (agent.closed) {
+      if (htmxRequest) {
+        return res.status(200).render("components/chatClosed", {
+          message: "Chat closed due to inappropriate behaviour",
+          redirectUrl: "/",
+          sender: "system",
+        });
+      }
+
+      return res.status(200).json({
+        status: "success",
+        sender: "system",
+        name: modelName,
+        closed: true,
+      });
+    }
 
     if (htmxRequest) {
       return res.status(200).render("partials/Message", {

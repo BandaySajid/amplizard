@@ -44,6 +44,7 @@ export class Model {
   private type: MODEL_TYPE;
   private tokens: TokenUsage;
   public currentUserQuery: string | null;
+  public closed: boolean;
 
   constructor(
     { modelName, botId, chatId, config, type }: ModelInitConfig,
@@ -53,6 +54,7 @@ export class Model {
     this.chatId = chatId;
     this.botId = botId;
     this.modelName = modelName;
+    this.closed = false;
     this.history = [];
 
     //TODO: Context Caching

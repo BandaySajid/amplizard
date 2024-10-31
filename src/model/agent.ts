@@ -11,6 +11,8 @@ import { z } from "zod";
 type ChatId = string;
 type ChatAgentStore = Map<ChatId, Model>;
 
+const IMC_DEFAULT = 3;
+
 function isTriggerRespError(arg: any): arg is TriggerRespError {
   return arg && arg.status === "error" && arg.description;
 }
@@ -58,6 +60,7 @@ const hookAgent = prepareHookAgent({
 export async function prepareChatAgent(
   modelInitConfig: ModelInitConfig,
 ): Promise<Model> {
+  let imc = 0;
   if (!modelInitConfig.config) modelInitConfig.config = {};
 
   const agent = new Model(modelInitConfig, []);
@@ -82,6 +85,28 @@ export async function prepareChatAgent(
     },
   };
 
+  const inappr_m_declaration = {
+    description: "Increment inapproriate messages counter",
+    parameters: z
+      .object({ message: z.string() })
+      .describe("inapproriate message from user"),
+    execute: async () => {
+      imc += 1;
+      if (imc >= IMC_DEFAULT) {
+        console.log("closing chat");
+        chatAgentStore.delete(agent.chatId!);
+        agent.closed = true;
+        return {
+          result: "Chat closed due to inapproriate behaviour of the user",
+        };
+      }
+
+      console.log("inapproriate_messages counter incremented to", imc);
+
+      return { result: "inapproriate messages counter incremented." };
+    },
+  };
+
   //TODO: Context Caching
   // await cacheContext(
   //   "gemini-1.5-flash-001",
@@ -92,6 +117,8 @@ export async function prepareChatAgent(
 
   agent.addTool("fetchHook", fetchHookFunctionDeclaration);
   agent.addTool("triggerHook", triggerHookFunctionDeclaration);
+  agent.addTool("triggerInappropriateMessageCounter", inappr_m_declaration);
+
   chatAgentStore.set(modelInitConfig.chatId as ChatId, agent);
 
   return agent;
