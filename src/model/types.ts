@@ -1,3 +1,6 @@
+import { CoreMessage } from "ai";
+import { writeHeapSnapshot } from "node:v8";
+
 export enum HarmBlockThreshold {
   HARM_BLOCK_THRESHOLD_UNSPECIFIED = "HARM_BLOCK_THRESHOLD_UNSPECIFIED",
   BLOCK_LOW_AND_ABOVE = "BLOCK_LOW_AND_ABOVE",
@@ -27,6 +30,7 @@ export enum GEN_AI_PROVIDER {
 export type ModelConfig = {
   temperature?: number;
   maxSteps?: number;
+  maxTokens?: number;
 };
 
 export type MODEL_TYPE = "hook" | "chat";
@@ -35,8 +39,17 @@ export type ModelInitConfig = {
   modelName?: string;
   botId?: string;
   chatId?: string;
-  instruction?: string;
+  instructions?: CoreMessage[];
   config?: ModelConfig;
   knowledge?: string;
   type: MODEL_TYPE;
+  saveHistory?: boolean
+};
+
+export type Resource = {
+  id: string;
+  bot_id: string;
+  content: string;
+  created_at?: string;
+  updated_at?: string;
 };

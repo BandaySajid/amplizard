@@ -7,10 +7,22 @@ interface AmplizardOpts {
   body?: string;
 }
 
+function getAmplizardScriptTag() {
+  const scripts = document.querySelectorAll("script");
+  let script: HTMLScriptElement | undefined;
+  scripts.forEach((s) => {
+    if (s.src.endsWith("/cdn/amplizard.js")) {
+      script = s;
+    }
+  });
+
+  return script;
+}
+
 class Amplizard {
   businessUrl: string;
   opts: AmplizardOpts;
-  localhost: boolean;
+  remote: boolean;
   embedUrl: string;
   chatUIUrl: string;
   host: string;
@@ -24,21 +36,16 @@ class Amplizard {
       throw new Error("bot id is required");
     }
 
-    const scriptUrl = new URL(
-      (document.getElementById("amplizardScript") as HTMLScriptElement).src,
-    );
+    const scriptUrl = new URL(getAmplizardScriptTag()!.src);
 
-    const hostname = scriptUrl.hostname;
+    this.host = scriptUrl.origin;
+    this.embedUrl = `${this.host}/embed/`;
 
-    if (hostname === "localhost" || hostname === "127.0.0.1") {
-      this.host = "http://localhost:9090";
-      this.localhost = true;
-      this.embedUrl = "http://localhost:9090/embed/";
-      this.chatUIUrl = "http://localhost:9090/js/chat.js";
+    if (scriptUrl.host !== "amplizard.com") {
+      this.chatUIUrl = `${this.host}/js/chat.js`;
+      this.remote = true;
     } else {
-      this.host = "https://amplizard.com";
-      this.localhost = false;
-      this.embedUrl = "https://amplizard.com/embed/";
+      this.remote = false;
       this.chatUIUrl = "https://cdn.amplizard.com/js/chat.js";
     }
 
@@ -49,23 +56,18 @@ class Amplizard {
   }
 
   async tokenize() {
-    const existingToken = localStorage.getItem("AMPLIZARD_UI_TOKEN");
-    if (!existingToken) {
+    //TODO
+    const existingChat = null; //localStorage.getItem("AMPLIZARD_CHAT_ID");
+    if (!existingChat) {
       const resp = await fetch(this.businessUrl, this.opts);
       const jsonResp = await resp.json();
-      const token = jsonResp.token;
       const chatId = jsonResp.chatId;
-
-      if (!token) {
-        throw new Error("No token received!");
-      }
 
       if (!chatId) {
         throw new Error("No chatId received!");
       }
 
       localStorage.setItem("AMPLIZARD_CHAT_ID", chatId);
-      localStorage.setItem("AMPLIZARD_UI_TOKEN", token);
     } else {
       console.log("using existing session");
     }
@@ -89,23 +91,28 @@ class Amplizard {
       console.error("Error while rendering ui");
     }
 
-    //this.loadJS(this.chatUIUrl, this.localhost ? "development" : "production");
+    //this.loadJS(this.chatUIUrl, this.remote ? "production" : "development");
     this.loadCSS(this.host + "/css/styles.css");
+
+    this.loadJS(
+      this.host + "/js/index.js",
+      this.remote ? "production" : "development",
+    );
     this.loadJS(
       this.host + "/js/htmx.min.js",
-      this.localhost ? "development" : "production",
+      this.remote ? "production" : "development",
     );
     this.loadJS(
       this.host + "/js/alpine.min.js",
-      this.localhost ? "development" : "production",
+      this.remote ? "production" : "development",
     );
     this.loadJS(
       this.host + "/js/fontawesome.js",
-      this.localhost ? "development" : "production",
+      this.remote ? "production" : "development",
     );
     this.loadJS(
       this.host + "/js/chatbot.js",
-      this.localhost ? "development" : "production",
+      this.remote ? "production" : "development",
     );
   }
 

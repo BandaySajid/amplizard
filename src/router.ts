@@ -78,6 +78,8 @@ views_router.get("/", (req, res) => {
   res.redirect("/bots");
 });
 
+views_router.get("/embed/:chat_id", bot_controller.handleEmbedBot);
+
 views_router.get(
   "/pricing",
   function (_: express.Request, res: express.Response) {
@@ -87,10 +89,10 @@ views_router.get(
   },
 );
 
-views_router.get(
-  "/bots/:bot_id/chat/:chat_id",
-  bot_controller.handleRenderChat,
-);
+// views_router.get(
+//   "/bots/:bot_id/chat/:chat_id",
+//   bot_controller.handleRenderChat,
+// );
 
 views_router.get("/bots", bot_controller.renderBots);
 

@@ -6,6 +6,7 @@ import { db } from "../db/connection.js";
 import { jsonrepair } from "jsonrepair";
 import { Hook } from "../types/hook.js";
 import { z } from "zod";
+import { generateEmbeddings, findRelevantContent } from "./embedding.js";
 //import { cacheContext } from "./context/cache.js";
 
 type ChatId = string;
@@ -13,7 +14,7 @@ type ChatAgentStore = Map<ChatId, Model>;
 
 const IMC_DEFAULT = 3;
 
-function isTriggerRespError(arg: any): arg is TriggerRespError {
+function isHookRespError(arg: any): arg is HookRespError {
   return arg && arg.status === "error" && arg.description;
 }
 
@@ -24,7 +25,7 @@ interface HookData {
   payload: object;
 }
 
-interface TriggerRespError {
+interface HookRespError {
   status: "error";
   description: string;
 }
@@ -44,7 +45,7 @@ const hookAgentContext = [
     role: "system",
     content: context.hookAgent.instruction,
   },
-  ...context.hookAgent.context,
+  // ...context.hookAgent.context,
 ];
 
 Model.setContext("chat", chatAgentContext as CoreMessage[]);
@@ -59,25 +60,32 @@ const hookAgent = prepareHookAgent({
 
 export async function prepareChatAgent(
   modelInitConfig: ModelInitConfig,
+  // hooks: object[],
 ): Promise<Model> {
   let imc = 0;
   if (!modelInitConfig.config) modelInitConfig.config = {};
 
-  const agent = new Model(modelInitConfig, []);
+  const name_instruction = {
+    role: "system",
+    content: `Your name from now is: ${modelInitConfig.modelName}, remember this.`,
+  };
+
+  modelInitConfig.instructions = [name_instruction] as CoreMessage[];
+
+  const agent = new Model(modelInitConfig, [] as CoreMessage[]);
 
   const fetchHookFunctionDeclaration = {
-    description: "Fetch available hook to trigger according to the intent.",
+    description: "Fetch available hook or hooks to trigger according to the intent. Always and only use this when knowledge base is not enough to provide answers. If no luck with this and knowledge base, that means you can't answer or solve the query, just drop it, don't try to answer / solve it on your own.",
     parameters: z
       .object({ intent: z.string() })
       .describe(
-        "What's your intent? What do you want to accomplish? what is the query about? What does user need ? Clearly state what you're trying to achieve or what data you need for the AI to effectively identify the relevant hook. Example: Need ceo name because user wants to know the name of the ceo",
+        "What's your intent? What do you want to accomplish? what is the query about? What do you need and What does user need ? Clearly state what you're trying to achieve or what data you need for the AI to effectively identify the relevant hook. Example: Need ceo name because user wants to know the name of the ceo",
       ),
     execute: async ({ intent }: { intent: string }) => {
       const result = await fetchHookHandler(
         intent,
         modelInitConfig.botId as string,
         hookAgent,
-        agent.currentUserQuery as string,
       );
 
       console.log("got result from fetching hooks", result);
@@ -107,6 +115,28 @@ export async function prepareChatAgent(
     },
   };
 
+  // const addResourceFunctionDeclaration = {
+  //   description: `add a resource to your knowledge base. If the user provides a random piece of knowledge unprompted, use this tool without asking for confirmation.`,
+  //   parameters: z.object({
+  //     content: z
+  //       .string()
+  //       .describe("the content or resource to add to the knowledge base"),
+  //   }),
+  //   execute: async ({ content }: { content: string }) =>
+  //     createResource({ content }),
+  // };
+
+  const getDataFromKnowledgeBaseFunctionDeclaration = {
+    description: `Use this always to check if you can provide info or answer the query / question. Use this to get information from your knowledge base. Always try and use this before fetching and triggering hooks.`,
+    parameters: z.object({
+      question: z.string().describe("the users question"),
+    }),
+    execute: async ({ question }: { question: string }) => {
+      const result = await findRelevantContent(question);
+      return { result }
+    },
+  };
+
   //TODO: Context Caching
   // await cacheContext(
   //   "gemini-1.5-flash-001",
@@ -118,6 +148,10 @@ export async function prepareChatAgent(
   agent.addTool("fetchHook", fetchHookFunctionDeclaration);
   agent.addTool("triggerHook", triggerHookFunctionDeclaration);
   agent.addTool("triggerInappropriateMessageCounter", inappr_m_declaration);
+  agent.addTool(
+    "checkKnowledgeBase",
+    getDataFromKnowledgeBaseFunctionDeclaration,
+  );
 
   chatAgentStore.set(modelInitConfig.chatId as ChatId, agent);
 
@@ -125,8 +159,6 @@ export async function prepareChatAgent(
 }
 
 function prepareHookAgent(modelInitConfig: ModelInitConfig) {
-  //modelInitConfig.instruction = context.hookAgent.instruction;
-  //const history = [...context.hookAgent.context] as CoreMessage[];
   const agent = new Model(modelInitConfig, []);
   return agent;
 }
@@ -145,7 +177,6 @@ async function fetchHookHandler(
   intent: string,
   bot_id: string,
   hookAgent: Model,
-  currentUserQuery: string,
 ) {
   try {
     const hooks = await db`SELECT * FROM hooks where bot_id = ${bot_id}`;
@@ -155,7 +186,7 @@ async function fetchHookHandler(
           hook.payload = JSON.parse(hook.payload);
 
           hook.headers = JSON.parse(hook.headers);
-        } catch (err) {}
+        } catch (err) { }
 
         return {
           name: hook.name,
@@ -176,7 +207,7 @@ async function fetchHookHandler(
     });
 
     console.log("[FETCHED-HOOKS]:", modHooks);
-    console.log({ intent, currentUserQuery });
+    console.log({ intent });
 
     if (modHooks.length <= 0) {
       return {
@@ -187,14 +218,14 @@ async function fetchHookHandler(
       };
     } else {
       let finalFetchedHook = await hookAgent.sendMessage(
-        `User: ${currentUserQuery}\nIntent: ${intent}\nHooks: ${JSON.stringify(modHooks)}.\n Return the hook that specifically satisfies the intent and the query and can perform the action that intent expects, otherwise just say 'No relevant hooks available to trigger'. Make sure the hook is returned in correct json format, just the json object, not a markdown format,`,
+        `Intent: ${intent}\nHooks: ${JSON.stringify(modHooks)}.\n`,
       );
 
       console.log("final fetched hook:", finalFetchedHook);
       if (typeof finalFetchedHook === "string")
         try {
           finalFetchedHook = JSON.parse(finalFetchedHook);
-        } catch (err) {}
+        } catch (err) { }
       return { result: finalFetchedHook };
     }
   } catch (err) {
@@ -246,7 +277,7 @@ const triggerHookFunctionDeclaration = {
       return triggerHook(hookName, {
         status: "error",
         description: "Invalid json data to trigger the hook",
-      } as TriggerRespError);
+      } as HookRespError);
     }
   },
 };
@@ -277,10 +308,10 @@ async function callApi(
   return jsonResp;
 }
 
-async function triggerHook(hook: string, data: HookData | TriggerRespError) {
+async function triggerHook(hook: string, data: HookData | HookRespError) {
   console.log(`[TRIGGER]: ${hook} with data being triggered`, data);
 
-  if (isTriggerRespError(data)) {
+  if (isHookRespError(data)) {
     return {
       status: data.status,
       description: data.description,

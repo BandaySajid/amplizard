@@ -9,6 +9,9 @@ import { body, validationResult } from "express-validator";
 import { prepareChatAgent, getChatAgent } from "../model/agent.js";
 import config from "../config.js";
 import { CoreMessage } from "ai";
+import { Hook } from "../types/hook.js";
+import { generateEmbeddings } from "../model/embedding.js";
+import { Resource } from "../model/types.js";
 
 type Bot = {
   bot_id: crypto.UUID;
@@ -17,8 +20,39 @@ type Bot = {
   knowledge?: string;
 };
 
+async function createOrUpdateResource(resource: Resource): Promise<boolean> {
+  const [exr] =
+    (await db`SELECT id FROM resources where bot_id = ${resource.bot_id}`) as Resource[];
+
+  if (!exr) {
+    resource.id = crypto.randomUUID();
+    await db`INSERT INTO resources ${db(resource)}`;
+  } else {
+    resource.id = exr.id;
+    await db`UPDATE resources SET content = ${resource.content} where bot_id = ${resource.bot_id}`;
+  }
+
+  const embeddings = await generateEmbeddings(resource.content);
+
+  const emb_vals = embeddings.map((e) => {
+    return {
+      id: crypto.randomUUID(),
+      resource_id: resource.id,
+      content: e.content,
+      embedding: JSON.stringify(e.embedding),
+    };
+  });
+
+  console.log("embeddings generated");
+
+  await db`INSERT into embeddings ${db(emb_vals)}`;
+
+  return true;
+}
+
 // const MAX_FILE_SIZE = 20 * (1000 * 1000);
-const LOCALHOST = `http://localhost:${config.server.port}`;
+
+const LOCALHOST = `http://${config.server.ip}:${config.server.port}`;
 const REMOTEHOST = `https://amplizard.com`;
 //const CACHE_EXPIRE_TIME = 7200; //will be 2 hours
 
@@ -119,12 +153,11 @@ export async function renderUpdateBotKnowledge(
 ) {
   try {
     const bot_id = req.params.id;
-    const [bot] =
-      (await db`SELECT knowledge FROM bots where bot_id = ${bot_id}`) as Bot[];
-    const k = bot.knowledge;
+    const [r] =
+      (await db`SELECT content FROM resources where bot_id = ${bot_id}`) as Resource[];
     res.render("bot/knowledge", {
       title: "Knowledge",
-      knowledge: k ? k : "",
+      knowledge: r?.content || "",
       url: "/api/v1/bots/" + bot_id + "/knowledge",
       method: "put",
     });
@@ -141,8 +174,13 @@ export async function handleUpdateBotKnowledge(
 ) {
   try {
     const { knowledge } = req.body;
+    const { id } = req.params;
 
-    await db`UPDATE bots SET knowledge = ${knowledge} where bot_id = ${req.params.id}`;
+    await createOrUpdateResource({
+      content: knowledge,
+      bot_id: id,
+    } as Resource);
+
     return res.json({
       status: "success",
       description: "bot knowledge updated successfully!",
@@ -293,18 +331,20 @@ export async function handleDeleteBot(
 async function createNewChat(
   botId: string,
   botName: string,
-  knowledge?: string,
+  // knowledge?: string,
 ): Promise<string> {
   const chatId = crypto.randomUUID();
 
-  await prepareChatAgent({
-    modelName: botName,
-    botId,
-    chatId,
-    knowledge,
-    type: "chat",
-    config: { maxSteps: 5 },
-  });
+  await prepareChatAgent(
+    {
+      modelName: botName,
+      botId,
+      chatId,
+      type: "chat",
+      config: { maxSteps: 8, maxTokens: 1000 },
+      saveHistory: true,
+    },
+  );
 
   return chatId;
 }
@@ -344,7 +384,7 @@ export async function handleCreateChatSession(
     const newChatId = await createNewChat(
       exBot.bot_id,
       exBot.name,
-      exBot.knowledge,
+      // exBot.knowledge,
     );
 
     res.status(201).json({
@@ -368,7 +408,7 @@ export async function handleChat(
     const { chat_id } = req.params;
 
     if (!(prompt?.trim().length > 0) && !req.file) {
-      return respError(400, "message or a file is required!", res);
+      return respError(400, "message is required!", res);
     }
 
     let agent = getChatAgent(chat_id);
@@ -400,7 +440,7 @@ export async function handleChat(
 
     if (htmxRequest) {
       return res.status(200).render("partials/Message", {
-        message,
+        message: message.trimEnd(),
         sender: "AI",
         layout: false,
         name: modelName,
@@ -420,12 +460,13 @@ export async function handleChat(
   }
 }
 
-export async function handleRenderChat(
+export async function handleEmbedBot(
   req: express.Request,
   res: express.Response,
   next: express.NextFunction,
 ) {
   try {
+    console.log("got embed request");
     const chatId = req.params.chat_id as string;
 
     const chatSession = getChatAgent(chatId);
@@ -435,6 +476,7 @@ export async function handleRenderChat(
         title: "Chat not found",
         embed: true,
         description: "Chat does not exist!",
+        layout: false,
       });
     }
 
@@ -452,7 +494,9 @@ export async function handleRenderChat(
 
     const endpoint = `/api/v1/bots/${botData.botId}/chat/${chatId}`;
 
-    const history = formatChatHistory(chatSession.getHistory());
+    const history = formatChatHistory(
+      chatSession.getHistory() as CoreMessage[],
+    );
 
     console.log("chat history", history);
 

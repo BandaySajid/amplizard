@@ -25,17 +25,17 @@
             <div class="right grid grid-cols-1 sm:grid-cols-2 gap-2 p-1 text-center">
               <div class="input-container w-full">
                 <label class="text-sm text-white" for="payload">Payload / Body</label>
-                <p class="text-white text-xs text-blue-300">Ex: {"userId": 1}</p>
+                <p class="text-white text-xs text-yellow-300 ">Ex: static value: {"userId": 1} or identifier: {"userId": "{id of the user}"}</p>
                 <div class="p-2 w-full h-full mx-auto flex-col gap-4">
                   <p class="text-xs text-red-500 json-error hidden">Invalid JSON data</p>
                   <textarea type="text" id="hook_payload" oninput="validateJSON(event);"
-                    style="background: rgb(13, 17, 23);" placeholder="Enter Payload data here." name="payload"Jjk
+                    style="background: rgb(13, 17, 23);" placeholder="Enter Payload data here." name="payload"
 																																																class="flex w-full mt-2 min-h-[200px] px-3 py-2 text-sm bg-black border rounded-md text-white border-neutral-300 placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50">{{#if hook.payload}}{{hook.payload}}{{else}}{}{{/if}}</textarea>
                 </div>
               </div>
               <div class="input-container w-full">
                 <label class="text-sm text-white" for="headers">Headers</label>
-                <p class="text-white text-xs text-blue-300">Ex: {"Content-Type": "application/json"}</p>
+                <p class="text-white text-xs text-yellow-300">Ex: {"Content-Type": "application/json"}</p>
                 <div class="p-2 w-full h-full mx-auto flex-col items-center gap-4">
                   <p class="text-xs text-red-500 json-error hidden">Invalid JSON data</p>
                   <textarea type="text" id="hook_{{btn_name}}" form="hook_edit_form" oninput="validateJSON(event);"

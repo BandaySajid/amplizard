@@ -1,5 +1,5 @@
 {{#if (eq sender "AI")}}
-<div class="flex gap-3 my-4 text-gray-600 text-sm flex-1 mt-4">
+<div class="{{#if loader}} message-loader {{/if}} flex gap-3 my-4 text-gray-600 text-sm flex-1 mt-4">
   <span class="relative flex shrink-0 overflow-hidden rounded-full w-8 h-8">
     <div class="rounded-full bg-gray-100 border border-gray-300 p-1">
       <!-- AI SVG -->
@@ -9,9 +9,15 @@
       </svg>
     </div>
   </span>
+  {{#if loader}}
+  <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><style>
+      .spinner_qM83{animation:spinner_8HQG 0.9s infinite}.spinner_oXPr{animation-delay:.1s}.spinner_ZTLf{animation-delay:.2s}@keyframes spinner_8HQG{0%,57.14%{animation-timing-function:cubic-bezier(0.33,.66,.66,1);transform:translate(0)}28.57%{animation-timing-function:cubic-bezier(0.33,0,.66,.33);transform:translateY(-6px)}100%{transform:translate(0)}}
+    </style><circle class="spinner_qM83" cx="4" cy="12" r="3"/><circle class="spinner_qM83 spinner_oXPr" cx="12" cy="12" r="3"/><circle class="spinner_qM83 spinner_ZTLf" cx="20" cy="12" r="3"/></svg>
+  {{else}}
   <p class="leading-relaxed break-words flex flex-col messageOuter max-w-[70%] bg-neutral-200 p-2 rounded-md ">
     <span class="messageInner whitespace-pre-wrap text-black">{{message}}</span>
   </p>
+  {{/if}}
 </div>
 {{else}}
 <div class="flex gap-3 my-4 text-gray-600 text-sm flex-1 mt-4 justify-end">

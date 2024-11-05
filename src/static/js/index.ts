@@ -2,6 +2,8 @@ type ChVals = {
   [key: string]: string;
 };
 
+console.log("index loaded");
+
 type inputError = {
   element: HTMLInputElement;
   path: string;

@@ -37,25 +37,27 @@ export class Model {
   public modelName?: string;
   static model: LanguageModelV1;
   static context: ModelContext = {};
-  private history: CoreMessage[];
+  private history?: CoreMessage[];
   private tools: Record<string, CoreTool<any, any>>;
   private modelConfig: ModelConfig;
   static indexes: ModelIndex = { chat: -1, hook: -1 };
   private type: MODEL_TYPE;
   private tokens: TokenUsage;
-  public currentUserQuery: string | null;
   public closed: boolean;
+  private instructions: CoreMessage[];
 
   constructor(
-    { modelName, botId, chatId, config, type }: ModelInitConfig,
+    { modelName, botId, chatId, config, type, instructions, saveHistory }: ModelInitConfig,
     history: CoreMessage[],
   ) {
-    this.currentUserQuery = null;
     this.chatId = chatId;
     this.botId = botId;
     this.modelName = modelName;
     this.closed = false;
-    this.history = [];
+    if (saveHistory) {
+      this.history = []
+    }
+    this.instructions = instructions || [];
 
     //TODO: Context Caching
 
@@ -63,39 +65,44 @@ export class Model {
     this.modelConfig = { ...config };
     this.type = type;
 
-    this.history.push(...history);
+    this.history?.push(...history);
     this.tokens = { input: 0, output: 0, total: 0 };
   }
 
   async sendMessage(userPrompt: string, _: boolean = false): Promise<string> {
     //TODO: implement message streaming.
-
-    this.currentUserQuery = userPrompt;
+    const user_msg = { role: "user", content: userPrompt } as CoreMessage;
 
     Model.balanceModels(this.type);
 
-    this.history.push({ role: "user", content: userPrompt });
-
     //so that we intitialize each instance of model with only its own chat history and not with the context, since the context or system prompts are same for all models / agents.
     const historyWithContext = [
-      {
-        role: "system",
-        content: `Your name from now is: ${this.modelName}, remember this.`,
-      } as CoreMessage,
-      ...Model.getContext(this.type),
-      ...this.history,
+      ...this.instructions,
     ];
+
+    historyWithContext.push(...Model.getContext(this.type))
+
+    if (this.history) {
+      this.history.push(user_msg);
+      historyWithContext.push(...this.history);
+    } else {
+      historyWithContext.push(user_msg)
+    }
+
+    console.log(historyWithContext);
 
     const result = await generateText({
       model: Model.model!,
-      //temperature: 1,
+      temperature: 1,
       tools: this.tools,
       messages: historyWithContext,
       ...this.modelConfig,
     });
 
-    for (const msg of result.response.messages) {
-      this.history.push(msg);
+    if (this.history) {
+      for (const msg of result.response.messages) {
+        this.history.push(msg);
+      }
     }
 
     console.log("Current token usage:", result.usage);

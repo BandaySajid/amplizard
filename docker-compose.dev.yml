@@ -5,13 +5,14 @@ services:
     ports:
       - "6379:6379"
   postgres:
-    image: postgres:16-alpine
     env_file: ".env" #comment out this line if you want to provide env vars directly, and use the env vars given below.
     #environment:
       #- POSTGRES_USER=postgres
       #- POSTGRES_DB=amplizard
       #- POSTGRES_PASSWORD=postgres
-
+    build:
+      context: .
+      dockerfile: DockerfileDev  # If you have a separate Dockerfile, or omit if not needed
     ports: 
       - "5432:5432"
 
