@@ -33,8 +33,6 @@ export type ModelConfig = {
   maxTokens?: number;
 };
 
-export type MODEL_TYPE = "hook" | "chat";
-
 export type ModelInitConfig = {
   modelName?: string;
   botId?: string;
@@ -43,7 +41,7 @@ export type ModelInitConfig = {
   config?: ModelConfig;
   knowledge?: string;
   type: MODEL_TYPE;
-  saveHistory?: boolean
+  saveHistory?: boolean;
 };
 
 export type Resource = {

@@ -1,0 +1,515 @@
+[
+  {
+    "role": "user",
+    "content": "Hi"
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Hello! How can I help you today?"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "content": "What is the name of this company ?"
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool-call",
+        "toolCallId": "1",
+        "toolName": "fetchHook",
+        "args": {
+          "intent": "Need to know the name of this company."
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "1",
+        "toolName": "fetchHook",
+        "result": {
+          "result": "No relevant hooks available to trigger."
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool-call",
+        "toolCallId": "0",
+        "toolName": "getDataFromKnowledgeBase",
+        "args": {
+          "question": "What is the name of this company."
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "0",
+        "toolName": "getDataFromKnowledgeBase",
+        "result": {
+          "result": "[{\"name\":\"\\n\\n---'\",\"similarity\":0.39181507505561497},{\"name\":\"Company name: BUBBLE\",\"similarity\":0.4372400541104323}]"
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "The name of this company is BUBBLE."
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "content": "I want to cancel an order with id 101"
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Why do you want to cancel that order?"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "content": "The price has changed."
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool-call",
+        "toolCallId": "1",
+        "toolName": "fetchHook",
+        "args": {
+          "intent": "Need the order data to verify if the order is present for a user."
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "1",
+        "toolName": "fetchHook",
+        "result": {
+          "result": "{\"hook\":{\"name\":\"getOrderData\",\"url\":\"http://192.168.1.6:7254/orders/{order_id}\",\"method\":\"POST\",\"payload\":{\"userId\":\"{userId}\"},\"headers\":{\"content-type\":\"application/json\"},\"signal\":\"When an individual order data is needed for a user.\"}}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool-call",
+        "toolCallId": "1",
+        "toolName": "fetchHook",
+        "args": {
+          "intent": "Need the data of the current user so that further operations on behalf of that user can be performed."
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "1",
+        "toolName": "fetchHook",
+        "result": {
+          "result": "{\"hook\":{\"name\":\"getCurrentUserData\",\"url\":\"http://192.168.1.6:7254/currentUser\",\"method\":\"GET\",\"payload\":{},\"headers\":{\"content-type\":\"application/json\"},\"signal\":\"When the current user data is needed / required\"}}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool-call",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "args": {
+          "hookName": "getCurrentUserData",
+          "data": "{\"url\":\"http://192.168.1.6:7254/currentUser\",\"method\":\"GET\",\"payload\":{},\"headers\":{\"content-type\":\"application/json\"}}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "result": {
+          "result": "{\"id\":1,\"name\":\"David Manohan\",\"email\":\"david@example.com\",\"joined\":\"2022-10-14\",\"auth_token\":\"22221238921311892138\"}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool-call",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "args": {
+          "hookName": "getOrderData",
+          "data": "{\"url\":\"http://192.168.1.6:7254/orders/101\",\"method\":\"POST\",\"payload\":{\"userId\":1},\"headers\":{\"content-type\":\"application/json\"}}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "result": {
+          "result": "{\"id\":101,\"userId\":1,\"item\":\"Laptop\",\"amount\":1200,\"imageUrl\":\"https://images.pexels.com/photos/2280547/pexels-photo-2280547.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1\",\"date\":\"2024-08-16\"}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Alright I have verified that you have an order of Laptop with id 101 placed on 2024-08-16. Do you really wish to cancel it?"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "content": "Yes."
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool-call",
+        "toolCallId": "0",
+        "toolName": "fetchHook",
+        "args": {
+          "intent": "Need to cancel an order because its the users query"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "0",
+        "toolName": "fetchHook",
+        "result": {
+          "result": "{\"hook\":{\"name\":\"cancelOrderHook\",\"url\":\"http://192.168.1.6:7254/orders/{order_id}/cancel\",\"method\":\"POST\",\"payload\":{\"userId\":\"{userId}\"},\"headers\":{\"content-type\":\"application/json\"},\"signal\":\"When an individual order has to be cancelled for a user.\"}}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool-call",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "args": {
+          "hookName": "cancelOrderHook",
+          "data": "{\"url\":\"http://192.168.1.6:7254/orders/101/cancel\",\"method\":\"POST\",\"payload\":{\"userId\":1},\"headers\":{\"content-type\":\"application/json\"}}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "result": {
+          "result": "{\"status\":\"success\",\"description\":\"Order with id 101 has been cancelled.\"}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Your order with id 101 has been cancelled. Is there anything else I can help you with?"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "content": "No thanks."
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Have a nice day."
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "content": "what is the valuation of this company?"
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool-call",
+        "toolCallId": "0",
+        "toolName": "fetchHook",
+        "args": {
+          "intent": "Need to know the valuation of this company."
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "0",
+        "toolName": "fetchHook",
+        "result": {
+          "result": "No relevant hooks available to trigger."
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool-call",
+        "toolCallId": "1",
+        "toolName": "getDataFromKnowledgeBase",
+        "args": {
+          "question": "what is the valuation of this company?"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "1",
+        "toolName": "getDataFromKnowledgeBase",
+        "result": {
+          "result": "[]"
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Sorry I don't have that info."
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "content": "No worries, thanks. Bye."
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Bye have a nice day."
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "content": "Can you track my order with id 102?"
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool-call",
+        "toolCallId": "2",
+        "toolName": "fetchHook",
+        "args": {
+          "intent": "Need to track current user's order."
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "2",
+        "toolName": "fetchHook",
+        "result": {
+          "result": "{\"hooks\": [{\"hook\":{\"name\":\"getCurrentUserData\",\"url\":\"http://192.168.1.6:7254/currentUser\",\"method\":\"GET\",\"payload\":{},\"headers\":{\"content-type\":\"application/json\"},\"signal\":\"When the current user data is needed / required\"}}, {\"hook\":{\"name\":\"trackOrderHookForUser\",\"url\":\"http://192.168.1.6:7254/orders/{order_id}/track?userId={userId}\",\"method\":\"GET\",\"payload\":{},\"headers\":{\"content-type\":\"application/json\"},\"signal\":\"When tracking info of an order for a user is needed.\"}}, {\"hook\":{\"name\":\"trackOrderHookForAdmin\",\"url\":\"http://192.168.1.6:7254/orders/{order_id}/track?userId={userId}\",\"method\":\"GET\",\"payload\":{},\"headers\":{\"content-type\":\"application/json\"},\"signal\":\"When tracking info of an order for an admin is needed.\"}}],\"order_indexes\":[0, 1]}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool-call",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "args": {
+          "hookName": "getCurrentUserData",
+          "data": "{\"url\":\"http://192.168.1.6:7254/currentUser\",\"method\":\"GET\",\"payload\":{},\"headers\":{\"content-type\":\"application/json\"}}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "result": {
+          "result": "{\"id\":1,\"name\":\"David Manohan\",\"email\":\"david@example.com\",\"joined\":\"2022-10-14\",\"auth_token\":\"22221238921311892138\"}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool-call",
+        "toolCallId": "3",
+        "toolName": "triggerHook",
+        "args": {
+          "hookName": "trackOrderHook",
+          "data": "{\"url\":\"http://192.168.1.6:7254/orders/102/track?userId=1\",\"method\":\"GET\",\"payload\":{}:,\"headers\":{\"content-type\":\"application/json\"}}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "3",
+        "toolName": "triggerHook",
+        "result": {
+          "result": "{\"orderId\":\"102\",\"status\":\"In Transit\",\"estimatedDelivery\":\"2024-09-02\",\"lastLocation\":\"Warehouse 23, Springfield\"}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Your order with id 102 is in Transit and the estimated delivery data is 2024-09-02 and the last location it was seen at is Warehouse 23, Springfield. Is there anything else I can assist you with?"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "content": "No, that will be all."
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Thank you! Have a great day!"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "content": "Who is the cto of this company and when was it established?"
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool-call",
+        "toolCallId": "1",
+        "toolName": "fetchHook",
+        "args": {
+          "intent": "Need to know who is the cto of this company, because its the user's query"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "1",
+        "toolName": "fetchHook",
+        "result": {
+          "result": "{\"hooks\": [{\"hook\":{\"name\":\"getCTOName\",\"signal\":\"When the current cto info is needed / required\", \"response\": \"Company cto is Yasir.\"}}, {\"hook\":{\"name\":\"getCompanyEstablishmentDate\",\"signal\":\"When the company establishment date is needed / required\", \"response\": \"Company was established in june 2022.\"}}], \"order_indexes\": [0, 1]}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Yasir is the cto of this company and it was established in 2022."
+      }
+    ]
+  }
+]
+

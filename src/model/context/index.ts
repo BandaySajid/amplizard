@@ -5,6 +5,7 @@ import config from "../../config.js";
 import queries from "./json/queries.json" assert { type: "json" };
 import inappropriate_queries from "./json/inappropriate_queries.json" assert { type: "json" };
 import fetch_hooks from "./json/fetch_hooks.json" assert { type: "json" };
+import actor_context from "./json/actor.json" assert { type: "json" };
 
 const __dirname = config.dirname(import.meta.url);
 
@@ -18,7 +19,22 @@ const hookInstruction = fs.readFileSync(
   "utf8",
 );
 
-const chat_context = [...queries, ...inappropriate_queries];
+const actorInstruction = fs.readFileSync(
+  path.join(__dirname, "./txt/instructions/actor.txt"),
+  "utf8",
+);
+
+const actionGenInstruction = fs.readFileSync(
+  path.join(__dirname, "./txt/instructions/action-generator.txt"),
+  "utf8",
+);
+
+const analyzerInstruction = fs.readFileSync(
+  path.join(__dirname, "./txt/instructions/analyzer.txt"),
+  "utf8",
+);
+
+const chat_context = queries; //[...queries, ...inappropriate_queries];
 
 const hook_context = fetch_hooks;
 
@@ -29,5 +45,7 @@ export function getContext() {
       context: chat_context,
     },
     hookAgent: { instruction: hookInstruction, context: hook_context },
+    actorAgent: { instruction: actorInstruction, context: actor_context },
+    actionGenAgent: { instruction: actionGenInstruction, context: [] },
   };
 }

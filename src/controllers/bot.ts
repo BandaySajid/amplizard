@@ -331,6 +331,7 @@ export async function handleDeleteBot(
 async function createNewChat(
   botId: string,
   botName: string,
+  hooks: Hook[],
   // knowledge?: string,
 ): Promise<string> {
   const chatId = crypto.randomUUID();
@@ -344,6 +345,7 @@ async function createNewChat(
       config: { maxSteps: 8, maxTokens: 1000 },
       saveHistory: true,
     },
+    hooks,
   );
 
   return chatId;
@@ -381,9 +383,13 @@ export async function handleCreateChatSession(
       return respError(404, "bot with this id does not exist!", res);
     }
 
+    const hooks =
+      (await db`SELECT * FROM hooks where bot_id = ${bot_id}`) as Hook[];
+
     const newChatId = await createNewChat(
       exBot.bot_id,
       exBot.name,
+      hooks,
       // exBot.knowledge,
     );
 
@@ -402,8 +408,8 @@ export async function handleChat(
   res: express.Response,
   next: express.NextFunction,
 ) {
+  const htmxRequest = req.headers["hx-request"];
   try {
-    const htmxRequest = req.headers["hx-request"];
     let { prompt } = req.body;
     const { chat_id } = req.params;
 
@@ -456,7 +462,24 @@ export async function handleChat(
       closed: false,
     });
   } catch (err) {
-    next(err);
+    console.error(`Error with api route ${req.url}`, err);
+
+    if (htmxRequest) {
+      return res.status(200).render("partials/Message", {
+        message: "System error occured",
+        sender: "AI",
+        layout: false,
+        closed: false,
+        error: true,
+      });
+    }
+
+    return res.status(400).json({
+      status: "error",
+      message: "System error occured",
+      sender: "AI",
+      closed: false,
+    });
   }
 }
 

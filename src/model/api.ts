@@ -32,7 +32,8 @@ export function initGenAI(apiKey: string): LanguageModelV1[] {
   const apiKeys = apiKey.split(",");
   for (const key of apiKeys) {
     const provider = createGoogleGenerativeAI({ apiKey: key });
-    const ai = provider(MODEL_ID,
+    const ai = provider(
+      MODEL_ID,
       // {
       //   safetySettings: safetySettings,
       //   //cachedContent: DEFAULT_CACHE_NAME,

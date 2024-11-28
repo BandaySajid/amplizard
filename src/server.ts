@@ -93,12 +93,14 @@ app.use("/api/v1/", hook_router);
 app.use(
   (
     err: Error,
-    _: express.Request,
+    req: express.Request,
     res: express.Response,
     next: express.NextFunction,
   ) => {
+    console.error("ERROR with server route", req.url);
     console.error("[SERVER ERROR]:", err);
     if (res.headersSent) {
+      console.log("headers sent")
       return next(err);
     }
     if (err.name === "PostgresError") {

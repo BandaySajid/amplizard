@@ -1,9 +1,9 @@
 {
   "$schema": "https://json.schemastore.org/swcrc",
   "jsc": {
-		"experimental": {
-			"keepImportAssertions": true
-		},
+    "experimental": {
+      "keepImportAssertions": true
+    },
     "parser": {
       "syntax": "typescript",
       "tsx": false,
@@ -15,15 +15,21 @@
     "loose": false,
     "externalHelpers": false,
     "keepClassNames": false
-	},
+  },
   "module": {
     "type": "es6",
     "strict": true,
     "strictMode": false,
     "noInterop": false,
     "lazy": false,
-    "resolveExtensions": [".js", ".ts", ".hbs", ".sql", ".json"]
+    "resolveExtensions": [
+      ".js",
+      ".ts",
+      ".hbs",
+      ".sql",
+      ".json"
+    ]
   },
   "minify": true,
-	"inlineSourcesContent": true,
+  "inlineSourcesContent": true,
 }

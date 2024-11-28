@@ -23,15 +23,18 @@ TODO:
     - [x] Bot name should be used as the model name.
     - [x] Chat expiry feature, when inactive for too long, when 3 inappropriate or unrelated things, When query resolved.
     - [x] For apis, migrate from responding with html to responding with json.
+    - [x] Fix the annoying bug, form submit button not enabling upon switching a radio button / switch, or just remove the disabling feature.
+    - [x] Feature to have direct responses for queries, no hook calling, just the response. 
+    - [x] Currently we are passing hookData and knowledge base to each instance of the Model Class, check if that causes a problem, since all the model instances associated with a bot would have the same knowledge and hookData.
+    - [x] Move system instruction and prompting to history approach, provide example hooks and real hooks, that approach would be easy and might work.
+
     - [ ] Save the chat history in database with id and save it in the format of chatSession content.
     - [ ] Write tests.
     - [ ] Fine tune the model.
     - [ ] Optimize system instruction and context.
     - [ ] Make chat closing more dynamic, move from direct closeChat function calling approach to incrementing inappropriate message / input counter and calling the closeChat function manually when it goes beyond the limit.
-    - [x] Feature to have direct responses for queries, no hook calling, just the response. 
-    - [ ] Fix the annoying bug, form submit button not enabling upon switching a radio button / switch, or just remove the disabling feature.
-    - [ ] Currently we are passing hookData and knowledge base to each instance of the Model Class, check if that causes a problem, since all the model instances associated with a bot would have the same knowledge and hookData.
-    - [ ] Move system instruction and prompting to history approach, provide example hooks and real hooks, that approach would be easy and might work.
+    - [ ] Reduce the context size.
+    - [ ] Add functionality to figure out if it has to trigger a hook (perform action) or provide info through knowledge base.
 
   - OVERALL:
     - [x] Businesses will request our server /chat endpoint with post method and start the chat. They will be having two options to get the data, as a stream or as a compleete response using direct post request or event stream.
@@ -49,7 +52,7 @@ TODO:
     - [ ] Businesses should be able to choose how to trigger hooks, like if they want to trigger the public api, or receiving event using websocket and writing custom code or triggering internal api using a tool on their backend.
     - [ ] Chatbot should figure out the recent behaviour of user and when he comes the next time, it should show up some buttons to do action. Like cancel_order or something.
     - [ ] Ratelimit system for each api / ai model to handle 1 request per second and 15 requests / min.
-
+    
   - UPCOMING:
     - [ ] Optimise model system instruction.
     - [ ] Monitoring chatbot errors and logging them on a separate logger.

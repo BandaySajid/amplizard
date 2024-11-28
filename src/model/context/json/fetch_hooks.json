@@ -3,26 +3,25 @@
     "role": "user",
     "content": "Intent: Need current user data \"[{\\\"hook_id\\\":\\\"61bc8fd0-3d9a-461f-baeb-55acf71077dc\\\",\\\"bot_id\\\":\\\"d789c556-b3fc-4de1-90bd-94056d1973a8\\\",\\\"name\\\":\\\"getCEOName\\\",\\\"signal\\\":\\\"when the ceo name is required\\\",\\\"url\\\":\\\"\\\",\\\"method\\\":\\\"\\\",\\\"payload\\\":\\\" {} \\\",\\\"headers\\\":\\\" {} \\\",\\\"response\\\":\\\"Ceo name is Sajid Banday\\\",\\\"rephrase\\\":false,\\\"api_calling\\\":false,\\\"created_at\\\":\\\"2024-10-28T01:30:52.072Z\\\"},{\\\"hook_id\\\":\\\"226d3649-dd00-40a6-a7e7-127db920101b\\\",\\\"bot_id\\\":\\\"d789c556-b3fc-4de1-90bd-94056d1973a8\\\",\\\"name\\\":\\\"getCompanyName\\\",\\\"signal\\\":\\\"when the company name is needed\\\",\\\"url\\\":\\\"\\\",\\\"method\\\":\\\"\\\",\\\"payload\\\":\\\" {}\\\",\\\"headers\\\":\\\"{}\\\",\\\"response\\\":\\\"Company name is Amplizard\\\",\\\"rephrase\\\":false,\\\"api_calling\\\":false,\\\"created_at\\\":\\\"2024-10-28T04:23:54.470Z\\\"}]\""
   },
-
-  { "role": "assistant", "content": "No relevant hooks available to trigger" },
-
+  {
+    "role": "assistant",
+    "content": "No relevant hooks available to trigger"
+  },
   {
     "role": "user",
     "content": "Intent: Need current user data \"[{\\\"hook_id\\\":\\\"61bc8fd0-3d9a-461f-baeb-55acf71077dc\\\",\\\"bot_id\\\":\\\"d789c556-b3fc-4de1-90bd-94056d1973a8\\\",\\\"name\\\":\\\"getCEOName\\\",\\\"signal\\\":\\\"when the ceo name is required\\\",\\\"url\\\":\\\"\\\",\\\"method\\\":\\\"\\\",\\\"payload\\\":\\\" {} \\\",\\\"headers\\\":\\\" {} \\\",\\\"response\\\":\\\"Ceo name is Sajid Banday\\\",\\\"rephrase\\\":false,\\\"api_calling\\\":false,\\\"created_at\\\":\\\"2024-10-28T01:30:52.072Z\\\"},{\\\"hook_id\\\":\\\"226d3649-dd00-40a6-a7e7-127db920101b\\\",\\\"bot_id\\\":\\\"d789c556-b3fc-4de1-90bd-94056d1973a8\\\",\\\"name\\\":\\\"getCompanyName\\\",\\\"signal\\\":\\\"when the company name is needed\\\",\\\"url\\\":\\\"\\\",\\\"method\\\":\\\"\\\",\\\"payload\\\":\\\" {}\\\",\\\"headers\\\":\\\"{}\\\",\\\"response\\\":\\\"Company name is Amplizard\\\",\\\"rephrase\\\":false,\\\"api_calling\\\":false,\\\"created_at\\\":\\\"2024-10-28T04:23:54.470Z\\\"},{\\\"hook_id\\\":\\\"new-hook-id\\\",\\\"bot_id\\\":\\\"d789c556-b3fc-4de1-90bd-94056d1973a8\\\",\\\"name\\\":\\\"getCurrentUserData\\\",\\\"signal\\\":\\\"When the current user data is needed / required\\\",\\\"url\\\":\\\"http://192.168.1.6:7254/currentUser\\\",\\\"method\\\":\\\"GET\\\",\\\"payload\\\":\\{\\},\\\"headers\\\":\\{\\\"content-type\\\":\\\"application/json\\\"\\},\\\"response\\\":\\\"\\\",\\\"rephrase\\\":false,\\\"api_calling\\\":false,\\\"created_at\\\":\\\"2024-10-28T04:23:54.470Z\\\"}]\""
   },
-
   {
     "role": "assistant",
-    "content": "{\"name\":\"getCurrentUserData\",\"url\":\"http:\\/\\/192.168.1.6:7254\\/currentUser\",\"method\":\"GET\",\"payload\":{},\"headers\":{\"content-type\":\"application\\/json\"},\"signal\":\"When the current user data is needed \\/ required\"}"
+    "content": "{\"hooks\": [{\"name\":\"getCurrentUserData\",\"url\":\"http:\\/\\/192.168.1.6:7254\\/currentUser\",\"method\":\"GET\",\"payload\":{},\"headers\":{\"content-type\":\"application\\/json\"},\"signal\":\"When the current user data is needed \\/ required\"}], \"order_indexes\": [0]}"
   },
-
   {
     "role": "user",
     "content": "Intent: Need current user data \"[{\\\"hook_id\\\":\\\"61bc8fd0-3d9a-461f-baeb-55acf71077dc\\\",\\\"bot_id\\\":\\\"d789c556-b3fc-4de1-90bd-94056d1973a8\\\",\\\"name\\\":\\\"getCEOName\\\",\\\"signal\\\":\\\"when the ceo name is required\\\",\\\"url\\\":\\\"\\\",\\\"method\\\":\\\"\\\",\\\"payload\\\":\\\" {} \\\",\\\"headers\\\":\\\" {} \\\",\\\"response\\\":\\\"Ceo name is Sajid Banday\\\",\\\"rephrase\\\":false,\\\"api_calling\\\":false,\\\"created_at\\\":\\\"2024-10-28T01:30:52.072Z\\\"},{\\\"hook_id\\\":\\\"226d3649-dd00-40a6-a7e7-127db920101b\\\",\\\"bot_id\\\":\\\"d789c556-b3fc-4de1-90bd-94056d1973a8\\\",\\\"name\\\":\\\"getCompanyName\\\",\\\"signal\\\":\\\"when the company name is needed\\\",\\\"url\\\":\\\"\\\",\\\"method\\\":\\\"\\\",\\\"payload\\\":\\\" {}\\\",\\\"headers\\\":\\\"{}\\\",\\\"response\\\":\\\"Company name is Amplizard\\\",\\\"rephrase\\\":false,\\\"api_calling\\\":false,\\\"created_at\\\":\\\"2024-10-28T04:23:54.470Z\\\"},{\\\"hook_id\\\":\\\"new-hook-id\\\",\\\"bot_id\\\":\\\"d789c556-b3fc-4de1-90bd-94056d1973a8\\\",\\\"name\\\":\\\"getCurrentUserData\\\",\\\"signal\\\":\\\"When the current user data is needed / required\\\",\\\"url\\\":\\\"http://192.168.1.6:7254/currentUser\\\",\\\"method\\\":\\\"GET\\\",\\\"payload\\\":\\{\\},\\\"headers\\\":\\{\\\"content-type\\\":\\\"application/json\\\"\\},\\\"response\\\":\\\"\\\",\\\"rephrase\\\":false,\\\"api_calling\\\":false,\\\"created_at\\\":\\\"2024-10-28T04:23:54.470Z\\\"}]\""
   },
-
   {
     "role": "assistant",
-    "content": "{\"name\":\"getCEOName\",\"signal\":\"When the ceo name is required\",\"response\":\"CEO name is Sajid Banday.\"}"
+    "content": "{\"hooks\": [{\"name\":\"getCEOName\",\"signal\":\"When the ceo name is required\",\"response\":\"CEO name is Sajid Banday.\"}], \"order_indexes\": [0]}"
   }
 ]
+

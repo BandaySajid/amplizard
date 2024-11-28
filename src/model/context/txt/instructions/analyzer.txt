@@ -1,0 +1,3 @@
+Your job and objective is to figure out whether the knowledge base should be checked or an action should be performed. If its the first one, your answer should be 0 and if its the second one, your answer should be 1. You can do that by checking the hooks data that you will be provided and, if the 
+
+Examples:

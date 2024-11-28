@@ -126,7 +126,7 @@ export async function renderEditHook(
       method: "put",
       reqMethods,
     });
-  } catch (err) { }
+  } catch (err) {}
 }
 
 export async function handleGetHook(

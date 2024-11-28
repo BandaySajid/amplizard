@@ -1,0 +1,98 @@
+[
+  {
+    "role": "user",
+    "content": "Messages from customer: ['What orders do I have']\nCustomer's Intent: Need to get all the orders of the user."
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool-call",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "args": {
+          "hookName": "getCurrentUserData",
+          "data": {
+            "url": "http://192.168.1.6:7254/currentUser",
+            "method": "GET",
+            "payload": {},
+            "headers": {
+              "content-type": "application/json"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "result": {
+          "result": {
+            "id": 543,
+            "name": "David Manohan",
+            "email": "david@example.com",
+            "joined": "2022-10-14",
+            "auth_token": "22221238921311892138"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool-call",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "args": {
+          "hookName": "getAllOrdersData",
+          "data": {
+            "url": "http://192.168.1.6:7254/orders",
+            "method": "POST",
+            "payload": {
+              "userId": 543
+            },
+            "headers": {
+              "content-type": "application/json"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool-result",
+        "toolCallId": "1",
+        "toolName": "triggerHook",
+        "result": {
+          "result": {
+            "id": 1122,
+            "userId": 543,
+            "item": "Something",
+            "amount": 600,
+            "imageUrl": "https://example.com/image",
+            "date": "2024-08-14"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\": 1122, \"userId\": 543, \"item\": \"Something\", \"amount\": 600, \"imageUrl\": \"https://example.com/image\", \"date\": \"2024-08-14\"}"
+      }
+    ]
+  }
+]

@@ -40,7 +40,7 @@ services:
 
   postgres:
     container_name: amplizard_db
-    image: postgres:16-alpine
+    image: postgres:latest
     env_file: ".env"  # Uncomment to use environment variables from the .env file
     # Uncomment the following lines if you want to provide env vars directly
     # environment:
