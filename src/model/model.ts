@@ -73,7 +73,6 @@ export class Model {
   }
 
   async sendMessage(userPrompt: string, _: boolean = false): Promise<string> {
-    console.log("prompt:", userPrompt);
     //TODO: implement message streaming.
     const user_msg = { role: "user", content: userPrompt } as CoreMessage;
 
@@ -84,17 +83,14 @@ export class Model {
 
     historyWithContext.push(...Model.getContext(this.type));
 
+    console.log("prompt:", userPrompt);
+
     if (this.history) {
       this.history.push(user_msg);
       historyWithContext.push(...this.history);
     } else {
       historyWithContext.push(user_msg);
     }
-
-    console.log(
-      "------------ chat messages --------------",
-      historyWithContext,
-    );
 
     const result = await generateText({
       model: Model.model!,

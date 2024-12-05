@@ -31,7 +31,6 @@ bot_router.delete(
 );
 bot_router.post(
   "/bots/:bot_id/chat/new",
-
   bot_controller.handleCreateChatSession,
 );
 bot_router.post(
@@ -78,21 +77,12 @@ views_router.get("/", (req, res) => {
   res.redirect("/bots");
 });
 
-views_router.get("/embed/:chat_id", bot_controller.handleEmbedBot);
-
 views_router.get(
-  "/pricing",
-  function (_: express.Request, res: express.Response) {
-    return res.render("comingSoon", {
-      title: "pricing",
-    });
-  },
+  "/bots/:bot_id/chat/:chat_id",
+  bot_controller.handleRenderChat,
 );
 
-// views_router.get(
-//   "/bots/:bot_id/chat/:chat_id",
-//   bot_controller.handleRenderChat,
-// );
+views_router.get("/embed/:chat_id", bot_controller.handleEmbedBot);
 
 views_router.get("/bots", bot_controller.renderBots);
 

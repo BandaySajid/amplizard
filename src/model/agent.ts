@@ -59,23 +59,21 @@ const actorAgentContext = [
 
 Model.initModel(
   "chat",
-  config.gemini.chat_api_key,
+  config.gemini.gemini_api_key,
   chatAgentContext as CoreMessage[],
 );
 
 Model.initModel(
   "actionGen",
-  config.gemini.hook_api_key,
+  config.gemini.gemini_api_key,
   actionGenAgentContext as CoreMessage[],
 );
 
 Model.initModel(
   "actor",
-  config.gemini.hook_api_key,
+  config.gemini.gemini_api_key,
   actorAgentContext as CoreMessage[],
 );
-
-// Model.initModel("analyzer", config.gemini.hook_api_key, []); //this will analyze whether the chat agent should check knowledge base or perform an action (fetch and trigger hooks).
 
 const chatAgentStore = new Map() as ChatAgentStore;
 
@@ -161,7 +159,7 @@ export async function prepareChatAgent(
       messages: Array<string>;
       intent: string;
     }) => {
-      console.log("Submitting query to actor!!!");
+      console.log("Submitting query to actor!!!", messages);
 
       const resp = await actorAgent.sendMessage(
         `Messages from customer: ${messages}\nCustomer's Intent: ${intent}`,

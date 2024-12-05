@@ -6,6 +6,6 @@ src/.env
 test_build
 docs/venv
 docs/site
-notes
+notes.md
 .pnpm-store/
 pnpm-lock.yaml

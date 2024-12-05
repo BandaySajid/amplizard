@@ -1,6 +1,6 @@
 # Amplizard
 
-Amplizard is a customer service chatbot service designed to solve complex queries using internal hook calling. This powerful service is built to enhance customer support by providing efficient and accurate responses.
+Amplizard is a customer service chatbot service designed to solve queries using internal hook calling. This powerful service is built to enhance customer support by providing efficient and accurate responses.
 
 ## Table of Contents
 
@@ -19,12 +19,13 @@ Amplizard is a customer service chatbot service designed to solve complex querie
 
 ## Prerequisites
 
-Before you begin, ensure you have met the following requirements:
+Before you get started, please ensure you have the following:
 
 - Node.js (version 20 or higher)
 - npm (version 9 or higher)
 - Docker (for containerized deployment)
-- Postgres and Redis for Non-docker setup.
+- Postgres and Redis (for non-Docker setup)
+- A Gemini API key from [https://ai.google.dev/](https://ai.google.dev/), which is free for development use.
 
 ## Installation
 
@@ -38,7 +39,7 @@ Follow these steps to set up Amplizard:
    cd amplizard
    ```
 
-### Non-Docker setup.
+### With docker setup.
 
 2. Install dependencies:
    ```bash
@@ -50,29 +51,26 @@ Follow these steps to set up Amplizard:
    ```
 4. Setup your env in .env file.
 
-- To start the development server, use the following command:
+5. Setup your env in .env file or directly from docker-compose.dev.yml file.
 
-```bash
-npm run dev
-```
-
-### With docker setup.
-
-2. Setup your env in .env file or directly from docker-compose.yml file.
-
-3. Start docker compose:
+6. Start docker compose (redis and postgres):
 
 - For the first time:
 
   ```bash
-    docker compose build
+  docker compose build
   ```
 
 - Finally:
 
   ```bash
-      docker compose -f docker-compose.dev.yml up
+  docker compose -f docker-compose.dev.yml up -d
   ```
+
+- To start the development server, use the following command:
+```bash
+npm run dev
+```
 
 ### Installation (production)
 
@@ -92,6 +90,24 @@ npm run dev
   ```bash
   docker compose up
   ```
+
+## Testing Bot Functionality
+
+To test Amplizard, follow these steps:
+
+1. Navigate to `http://localhost:9090/bots` and create a new bot, providing the necessary details and [hooks](#hooks).
+
+2. After creating the bot, make a note of the bot ID and execute the following command:
+
+   ```bash
+   curl -X POST http://localhost:9090/api/v1/bots/{botId}/chat/new
+   ```
+
+3. Wait for the API to create a new chat session, (some internal ai shenanigans). Once completed, retrieve the `chatId` from the response.
+
+4. Finally, visit the following URL to interact with the bot:
+
+   `http://localhost:9090/api/v1/bots/${botData.botId}/chat/${chatId}`
 
 ## Hooks
 

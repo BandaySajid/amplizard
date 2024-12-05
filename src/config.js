@@ -6,7 +6,7 @@ export default {
 
   server: {
     host: process.env.host || "localhost",
-    ip: process.env.ip || "",
+    ip: process.env.ip || "localhost",
     port: Number(process.env.port) || 9090,
     remote_host: process.env.remote_host || "",
   },
@@ -30,10 +30,7 @@ export default {
   },
 
   gemini: {
-    chat_api_key: process.env.GEMINI_CHAT_API_KEY || "",
-    hook_api_key: process.env.GEMINI_HOOK_API_KEY || "",
-    cache_api_key: process.env.GEMINI_CACHE_API_KEY || "",
-    embedding_api_key: process.env.GEMINI_EMBEDDING_API_KEY || "",
+    gemini_api_key: process.env.GEMINI_CHAT_API_KEY || "",
   },
 
   dirname: (meta_url) => {

@@ -483,13 +483,60 @@ export async function handleChat(
   }
 }
 
+export async function handleRenderChat(
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction,
+) {
+  try {
+    const chatId = req.params.chat_id as string;
+
+    const chatSession = getChatAgent(chatId);
+
+    if (!chatSession) {
+      return res.status(404).render("404", {
+        title: "Chat not found",
+        embed: true,
+        description: "Chat does not exist!",
+        layout: false,
+      });
+    }
+
+    const botData = {
+      name: chatSession.modelName,
+      botId: chatSession.botId,
+      chatId: chatId,
+    };
+
+    const endpoint = `/api/v1/bots/${botData.botId}/chat/${chatId}`;
+
+    const history = formatChatHistory(
+      chatSession.getHistory() as CoreMessage[],
+    );
+
+    console.log("chat history", history);
+
+    return res.render("chatbot", {
+      title: "bot",
+      noMenu: true,
+      bot: botData,
+      chatUrl:
+        config.environment === "production"
+          ? REMOTEHOST + endpoint
+          : LOCALHOST + endpoint,
+      history,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function handleEmbedBot(
   req: express.Request,
   res: express.Response,
   next: express.NextFunction,
 ) {
   try {
-    console.log("got embed request");
     const chatId = req.params.chat_id as string;
 
     const chatSession = getChatAgent(chatId);
